@@ -636,23 +636,54 @@ details.fold > .fold-content { padding: 0 12px 12px; }
               <label>Tipo de ajuste
                 <select id="protocolType">
                   <option value="hormone">Hormonios</option>
-                  <option value="peptide">Peptideos / Tirzepatida</option>
+                  <option value="peptide">Peptideos</option>
+                  <option value="tirze">Tirzepatida</option>
+                  <option value="custom">Novo produto</option>
                 </select>
               </label>
             </div>
-            <div class="check-list" id="protocolDayList" style="margin-top:10px"></div>
+            <details class="fold" id="protocolDaysFold">
+              <summary>Dias e frequencia</summary>
+              <div class="check-list fold-content" id="protocolDayList"></div>
+            </details>
             <div class="form-grid" id="hormoneDoseFields" style="margin-top:10px">
               <label>Enantato de Testosterona ml<input type="number" id="hormoneTestMl" min="0" step="0.1" value="0.5"></label>
               <label>Enantato de Metenolona ml<input type="number" id="hormonePrimoMl" min="0" step="0.1" value="1"></label>
               <label>NPP ml<input type="number" id="hormoneNppMl" min="0" step="0.1" value="0.5"></label>
             </div>
             <div class="form-grid" id="peptideFields" style="margin-top:10px">
-              <label>GHK-CU
-                <select id="ghkSchedule">
-                  <option value="daily">Todos os dias</option>
-                  <option value="weekdays">Segunda a sexta</option>
+              <label>Produto
+                <select id="peptideProduct">
+                  <option value="ghk">GHK-CU</option>
+                  <option value="tb">TB-500</option>
                 </select>
               </label>
+              <label>Dose mg<input type="number" id="peptideDoseMg" min="0" step="0.1" placeholder="manter fase atual"></label>
+            </div>
+            <div class="form-grid" id="tirzeFields" style="margin-top:10px">
+              <label>Dose Tirzepatida mg<input type="number" id="tirzeDoseMg" min="0" step="0.1" value="9.6"></label>
+            </div>
+            <div class="form-grid" id="customProtocolFields" style="margin-top:10px">
+              <label>Produto
+                <select id="customProductMode">
+                  <option value="new">Cadastrar novo produto</option>
+                </select>
+              </label>
+              <label>Nome do produto<input id="customProductName" placeholder="Ex.: SLUPP-332"></label>
+              <label>Categoria
+                <select id="customProductCategory">
+                  <option value="peptide">Peptideo</option>
+                  <option value="hormone">Hormonio</option>
+                </select>
+              </label>
+              <label>Unidade
+                <select id="customProductUnit">
+                  <option value="mg">mg</option>
+                  <option value="ml">ml</option>
+                </select>
+              </label>
+              <label>Dose por aplicacao<input type="number" id="customProductDose" min="0" step="0.1" placeholder="mg ou ml"></label>
+              <label>mg por unidade<input type="number" id="customProductMgPerUnit" min="0" step="0.1" value="1"></label>
             </div>
             <button class="btn primary" type="submit">Salvar ajuste de protocolo</button>
           </form>
@@ -837,6 +868,9 @@ const DEFAULT_SETTINGS = {
       rules: [
         { from: "2026-06-11", ghkDays: [0, 1, 2, 3, 4, 5, 6], tbDays: [1, 3, 5], tirzeDays: [0] }
       ]
+    },
+    custom: {
+      products: []
     }
   }
 };
@@ -1036,6 +1070,38 @@ function mergeFullBackup(base, extra) {
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
+function productIdFromName(name) {
+  return String(name || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40) || "produto";
+}
+function normalizeCustomProducts(products = []) {
+  return (Array.isArray(products) ? products : []).map((product, index) => {
+    const name = String(product.name || "").trim();
+    const id = product.id || productIdFromName(name) + "_" + index;
+    const unit = product.unit === "ml" ? "ml" : "mg";
+    const category = product.category === "hormone" ? "hormone" : "peptide";
+    const rules = Array.isArray(product.rules) ? product.rules : [];
+    return {
+      id,
+      name,
+      full: product.full || name,
+      category,
+      unit,
+      mgPerUnit: Number(product.mgPerUnit || 1),
+      initial: Number(product.initial || 0),
+      rules: rules.map(rule => ({
+        from: rule.from,
+        days: Array.isArray(rule.days) ? rule.days.map(Number) : [],
+        dose: Number(rule.dose || 0)
+      })).filter(rule => rule.from && rule.days.length && rule.dose > 0)
+    };
+  }).filter(product => product.name);
+}
 function normalizeSettings(settings = {}) {
   settings = settings || {};
   const defaults = clone(DEFAULT_SETTINGS);
@@ -1043,6 +1109,7 @@ function normalizeSettings(settings = {}) {
   const hormone = protocols.hormone || {};
   const ghk = protocols.ghk || {};
   const peptide = protocols.peptide || {};
+  const custom = protocols.custom || {};
   let hormoneRules = Array.isArray(hormone.rules) && hormone.rules.length ? hormone.rules : defaults.protocols.hormone.rules;
   const hasAutoInsertedNewRule = !hormone.userEdited
     && hormoneRules.length === 2
@@ -1062,6 +1129,11 @@ function normalizeSettings(settings = {}) {
         ...defaults.protocols.peptide,
         ...peptide,
         rules: Array.isArray(peptide.rules) && peptide.rules.length ? peptide.rules : defaults.protocols.peptide.rules
+      },
+      custom: {
+        ...defaults.protocols.custom,
+        ...custom,
+        products: normalizeCustomProducts(custom.products)
       }
     }
   };
@@ -1130,6 +1202,35 @@ function cycleWeekLabel(date, start, weeks = null) {
 function activeProtocolSettings() {
   return normalizeSettings(readStoredData(STORAGE)?.settings || {});
 }
+function productCatalog(settings = activeProtocolSettings()) {
+  const custom = (settings.protocols.custom.products || []).reduce((acc, product) => {
+    acc[product.id] = {
+      name: product.name,
+      full: product.full || product.name,
+      color: product.category === "hormone" ? "var(--test)" : "var(--ghk)",
+      unit: product.unit,
+      mgPerUnit: Number(product.mgPerUnit || 1),
+      initial: Number(product.initial || 0),
+      category: product.category,
+      custom: true
+    };
+    return acc;
+  }, {});
+  return { ...PRODUCTS, ...custom };
+}
+function productInfo(product, settings = activeProtocolSettings()) {
+  return productCatalog(settings)[product] || { name: product, full: product, color: "var(--muted)", unit: "mg", mgPerUnit: 1, initial: 0 };
+}
+function isHormoneProduct(product, settings = activeProtocolSettings()) {
+  return HORMONE_PRODUCTS.includes(product) || productInfo(product, settings).category === "hormone";
+}
+function isOralProduct(product) {
+  return ORAL_PRODUCTS.includes(product);
+}
+function activeCustomRule(product, date) {
+  const day = isoDate(date);
+  return (product.rules || []).slice().sort((a, b) => a.from.localeCompare(b.from)).filter(rule => rule.from <= day).pop();
+}
 function activeHormoneRule(date, settings = activeProtocolSettings()) {
   const rules = (settings.protocols.hormone.rules || []).slice().sort((a, b) => a.from.localeCompare(b.from));
   const day = isoDate(date);
@@ -1154,7 +1255,7 @@ function dosePlanFor(date) {
   }
   if (withinWeeks(date, GHK_START, 26)) {
     const ghkWeek = protocolWeek(date, GHK_START);
-    const ghkDose = ghkWeek <= 4 ? 1 : ghkWeek <= 8 ? 1.5 : 2;
+    const ghkDose = Number(peptideRule.ghkDoseMg || 0) > 0 ? Number(peptideRule.ghkDoseMg) : ghkWeek <= 4 ? 1 : ghkWeek <= 8 ? 1.5 : 2;
     const ghkDays = Array.isArray(peptideRule.ghkDays) ? peptideRule.ghkDays : (settings.protocols.ghk.daily ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5]);
     if (ghkDays.includes(dow)) {
       doses.push({ product: "ghk", qty: ghkDose * 2, displayQty: ghkDose, route: "SC", label: ghkDose.toString().replace(".", ",") + " mg" });
@@ -1162,11 +1263,19 @@ function dosePlanFor(date) {
   }
   if (withinWeeks(date, TB_START, 26) && (peptideRule.tbDays || [1, 3, 5]).includes(dow)) {
     const tbWeek = protocolWeek(date, TB_START);
-    const tbDose = tbWeek <= 4 ? 2 : 1;
+    const tbDose = Number(peptideRule.tbDoseMg || 0) > 0 ? Number(peptideRule.tbDoseMg) : tbWeek <= 4 ? 2 : 1;
     doses.push({ product: "tb", qty: tbDose, route: "SC", label: tbDose + " mg" });
   }
   if (date >= startOfDay(TIRZE_START) && (peptideRule.tirzeDays || [0]).includes(dow)) {
-    doses.push({ product: "tirze", qty: TIRZE_DOSE_MG, displayQty: TIRZE_DOSE_MG, route: "SC", label: "9,6 mg" });
+    const tirzeDose = Number(peptideRule.tirzeDoseMg || 0) > 0 ? Number(peptideRule.tirzeDoseMg) : TIRZE_DOSE_MG;
+    doses.push({ product: "tirze", qty: tirzeDose, displayQty: tirzeDose, route: "SC", label: tirzeDose.toString().replace(".", ",") + " mg" });
+  }
+  for (const product of settings.protocols.custom.products || []) {
+    const rule = activeCustomRule(product, date);
+    if (rule?.days?.includes(dow)) {
+      const route = product.category === "hormone" ? "IM" : "SC";
+      doses.push({ product: product.id, qty: rule.dose, displayQty: rule.dose, route, label: rule.dose.toString().replace(".", ",") + " " + product.unit });
+    }
   }
   if (date >= startOfDay(new Date("2026-06-11T08:00:00"))) {
     doses.push({ product: "escitalopram", qty: 1, displayQty: 20, route: "VO", label: "20 mg" });
@@ -1183,9 +1292,14 @@ function dosePlanFor(date) {
 function plannedProtocolGroups(date) {
   const doses = dosePlanFor(date);
   const groups = [];
+  const settings = activeProtocolSettings();
   const hormoneDoses = doses.filter(d => HORMONE_PRODUCTS.includes(d.product));
   if (hormoneDoses.length) {
     groups.push({ key: "hormones", name: "Hormonios", detail: summarizeDoses(hormoneDoses), doses: hormoneDoses });
+  }
+  for (const product of settings.protocols.custom.products || []) {
+    const customDoses = doses.filter(d => d.product === product.id);
+    if (customDoses.length) groups.push({ key: "custom:" + product.id, name: product.name, detail: summarizeDoses(customDoses), doses: customDoses });
   }
   const ghk = doses.filter(d => d.product === "ghk");
   if (ghk.length) groups.push({ key: "ghk", name: "GHK-CU", detail: summarizeDoses(ghk), doses: ghk });
@@ -1210,8 +1324,10 @@ function entriesForDay(entries, date) {
 function protocolKeysForEntry(entry) {
   if (Array.isArray(entry.protocols) && entry.protocols.length) return entry.protocols;
   const keys = new Set();
+  const customIds = new Set((activeProtocolSettings().protocols.custom.products || []).map(product => product.id));
   for (const dose of entry.doses || []) {
     if (HORMONE_PRODUCTS.includes(dose.product)) keys.add("hormones");
+    if (customIds.has(dose.product)) keys.add("custom:" + dose.product);
     if (dose.product === "ghk") keys.add("ghk");
     if (dose.product === "tb") keys.add("tb");
     if (dose.product === "tirze") keys.add("tirze");
@@ -1226,32 +1342,36 @@ function pendingProtocolGroups(entries, date) {
   return plannedProtocolGroups(date).filter(group => !done.has(group.key));
 }
 function plannedConsumptionUntil(date) {
-  const totals = Object.fromEntries(Object.keys(PRODUCTS).map(k => [k, 0]));
+  const products = productCatalog();
+  const totals = Object.fromEntries(Object.keys(products).map(k => [k, 0]));
   for (let d = startOfDay(START); d <= startOfDay(date); d = addDays(d, 1)) {
-    for (const dose of dosePlanFor(d)) totals[dose.product] += dose.qty;
+    for (const dose of dosePlanFor(d)) totals[dose.product] = (totals[dose.product] || 0) + dose.qty;
   }
   return totals;
 }
 function entriesConsumption(entries) {
-  const totals = Object.fromEntries(Object.keys(PRODUCTS).map(k => [k, Number(LEGACY_USED[k] || 0)]));
+  const products = productCatalog();
+  const totals = Object.fromEntries(Object.keys(products).map(k => [k, Number(LEGACY_USED[k] || 0)]));
   for (const entry of entries) {
     for (const dose of entry.doses || []) {
-      if (dose.product in totals) totals[dose.product] += Number(dose.qty || 0);
+      if (dose.product in products) totals[dose.product] = (totals[dose.product] || 0) + Number(dose.qty || 0);
     }
   }
   return totals;
 }
 function stockAdditions(stockAdds = []) {
-  const totals = Object.fromEntries(Object.keys(PRODUCTS).map(k => [k, 0]));
+  const products = productCatalog();
+  const totals = Object.fromEntries(Object.keys(products).map(k => [k, 0]));
   for (const add of stockAdds || []) {
-    if (add.product in totals) totals[add.product] += Number(add.qty || 0);
+    if (add.product in products) totals[add.product] = (totals[add.product] || 0) + Number(add.qty || 0);
   }
   return totals;
 }
 function stockSnapshot(entries, stockAdds = []) {
+  const products = productCatalog();
   const used = entriesConsumption(entries);
   const added = stockAdditions(stockAdds);
-  return Object.entries(PRODUCTS).map(([key, p]) => {
+  return Object.entries(products).map(([key, p]) => {
     const initial = p.initial + added[key];
     const left = initial - used[key];
     const depletion = findDepletionDate(key, left, entries);
@@ -1327,7 +1447,7 @@ function hormoneSiteFromEntry(entry) {
   return HORMONE_SITES.find(site => note.toLowerCase().includes(site.toLowerCase())) || "";
 }
 function hormoneEntries(entries) {
-  return entries.filter(entry => protocolKeysForEntry(entry).includes("hormones"));
+  return entries.filter(entry => protocolKeysForEntry(entry).some(protocolKeyNeedsHormoneSite));
 }
 function lastHormoneEntry(entries) {
   return hormoneEntries(entries).slice().sort((a, b) => b.timestamp - a.timestamp)[0] || null;
@@ -1361,17 +1481,30 @@ function updateProtocolForm(date = new Date()) {
   if (!from.value) from.value = isoDate(date);
   const settings = activeProtocolSettings();
   const rule = activeHormoneRule(date, settings);
+  const peptideRule = activePeptideRule(date, settings);
   document.getElementById("hormoneTestMl").value = rule.doses?.test ?? .5;
   document.getElementById("hormonePrimoMl").value = rule.doses?.primo ?? 1;
   document.getElementById("hormoneNppMl").value = rule.doses?.npp ?? .5;
-  document.getElementById("ghkSchedule").value = settings.protocols.ghk.daily ? "daily" : "weekdays";
+  const peptideProduct = document.getElementById("peptideProduct").value;
+  const peptideDose = peptideProduct === "tb" ? peptideRule.tbDoseMg : peptideRule.ghkDoseMg;
+  document.getElementById("peptideDoseMg").value = Number(peptideDose || 0) > 0 ? peptideDose : "";
+  document.getElementById("tirzeDoseMg").value = Number(peptideRule.tirzeDoseMg || 0) > 0 ? peptideRule.tirzeDoseMg : TIRZE_DOSE_MG;
   renderProtocolDayList();
 }
 function protocolDaysForForm() {
   const type = document.getElementById("protocolType").value;
   const date = new Date((document.getElementById("protocolFrom").value || isoDate(new Date())) + "T00:00:00");
   const settings = activeProtocolSettings();
-  if (type === "peptide") return activePeptideRule(date, settings).tirzeDays || [0];
+  const peptideRule = activePeptideRule(date, settings);
+  if (type === "peptide") {
+    return document.getElementById("peptideProduct").value === "tb" ? peptideRule.tbDays || [1, 3, 5] : peptideRule.ghkDays || [0, 1, 2, 3, 4, 5, 6];
+  }
+  if (type === "tirze") return peptideRule.tirzeDays || [0];
+  if (type === "custom") {
+    const selected = document.getElementById("customProductMode").value;
+    const product = (settings.protocols.custom.products || []).find(item => item.id === selected);
+    return activeCustomRule(product || {}, date)?.days || [0];
+  }
   return activeHormoneRule(date, settings).days || [0, 3];
 }
 function renderProtocolDayList() {
@@ -1386,6 +1519,8 @@ function syncProtocolFormMode() {
   const type = document.getElementById("protocolType").value;
   document.getElementById("hormoneDoseFields").style.display = type === "hormone" ? "grid" : "none";
   document.getElementById("peptideFields").style.display = type === "peptide" ? "grid" : "none";
+  document.getElementById("tirzeFields").style.display = type === "tirze" ? "grid" : "none";
+  document.getElementById("customProtocolFields").style.display = type === "custom" ? "grid" : "none";
 }
 function selectedProtocolDays() {
   return [...document.querySelectorAll("#protocolDayList input[type='checkbox']:checked")].map(input => Number(input.value));
@@ -1399,9 +1534,27 @@ function updateDataDiagnostics(data) {
     ? `Encontrado: ${sources.map(row => `${row.key} (${row.entries})`).join(", ")}. Estoque extra: ${stockAdds}.`
     : `Nenhuma chave antiga com registros detectada. Historico atual: ${data.entries.length} registros. Estoque extra: ${stockAdds}.`;
 }
+function renderProductOptions() {
+  const products = productCatalog();
+  const optionHtml = Object.entries(products).map(([key, product]) => `<option value="${key}">${product.name}</option>`).join("");
+  for (const id of ["stockProduct", "entryProduct"]) {
+    const select = document.getElementById(id);
+    const current = select.value;
+    select.innerHTML = optionHtml;
+    if (current && products[current]) select.value = current;
+  }
+  const customSelect = document.getElementById("customProductMode");
+  const currentCustom = customSelect.value;
+  const customOptions = (activeProtocolSettings().protocols.custom.products || [])
+    .map(product => `<option value="${product.id}">Ajustar ${product.name}</option>`)
+    .join("");
+  customSelect.innerHTML = `<option value="new">Cadastrar novo produto</option>${customOptions}`;
+  if (currentCustom && (currentCustom === "new" || products[currentCustom])) customSelect.value = currentCustom;
+}
 function render() {
   const data = load();
   const now = new Date();
+  renderProductOptions();
   document.getElementById("todayDow").textContent = fmtDate(now, { weekday: "short" }).replace(".", "");
   document.getElementById("todayDate").textContent = fmtDate(now, { day: "2-digit", month: "2-digit" });
   document.getElementById("hormoneWeek").textContent = cycleWeekLabel(now, HORMONE_START);
@@ -1446,11 +1599,12 @@ function renderCycleStatus(now) {
   ].join("");
 }
 function summarizeDoses(doses) {
-  return doses.map(d => PRODUCTS[d.product].name + " " + d.label + " " + d.route).join(" + ");
+  return doses.map(d => productInfo(d.product).name + " " + d.label + " " + d.route).join(" + ");
 }
 function shortDoseName(product) {
-  if (HORMONE_PRODUCTS.includes(product)) return "Horm";
-  if (["ghk", "tb", "tirze"].includes(product)) return "Peps";
+  if (isHormoneProduct(product)) return "Horm";
+  if (product === "tirze") return "Tirz";
+  if (["ghk", "tb"].includes(product) || productInfo(product).category === "peptide") return "Peps";
   return "";
 }
 function renderDoseList(id, doses) {
@@ -1462,7 +1616,7 @@ function renderDoseList(id, doses) {
   el.innerHTML = doses.map(d => doseHtml(d)).join("");
 }
 function doseHtml(d) {
-  const p = PRODUCTS[d.product];
+  const p = productInfo(d.product);
   const shared = d.product === "ghk" ? "Estoque abate " + d.qty.toString().replace(".", ",") + " mg por ser compartilhado" : p.full;
   const mg = Math.round(d.qty * p.mgPerUnit * 10) / 10;
   const small = d.product === "ghk" ? "individual" : mg.toString().replace(".", ",") + " mg";
@@ -1630,7 +1784,7 @@ function addEntry(date, note = "", kind = "planned", selectedProtocols = null, m
     const selected = Array.isArray(selectedProtocols) && selectedProtocols.length ? selectedProtocols : groups.map(group => group.key);
     doses = groups.filter(group => selected.includes(group.key)).flatMap(group => group.doses);
     entry.protocols = selected;
-    if (selected.includes("hormones") && meta.hormoneSite) {
+    if (selected.some(protocolKeyNeedsHormoneSite) && meta.hormoneSite) {
       entry.hormoneSite = meta.hormoneSite;
       entry.note = [meta.hormoneSite, note].filter(Boolean).join(" - ");
     }
@@ -1639,9 +1793,9 @@ function addEntry(date, note = "", kind = "planned", selectedProtocols = null, m
     const product = document.getElementById("entryProduct").value;
     const qty = Number(document.getElementById("entryQty").value || 0);
     if (qty > 0) {
-      const p = PRODUCTS[product];
+      const p = productInfo(product);
       const storedQty = product === "ghk" ? qty * 2 : qty;
-      doses = [{ product, qty: storedQty, displayQty: qty, route: HORMONE_PRODUCTS.includes(product) ? "IM" : ORAL_PRODUCTS.includes(product) ? "VO" : "SC", label: qty.toString().replace(".", ",") + " " + p.unit }];
+      doses = [{ product, qty: storedQty, displayQty: qty, route: isHormoneProduct(product) ? "IM" : isOralProduct(product) ? "VO" : "SC", label: qty.toString().replace(".", ",") + " " + p.unit }];
     }
   }
   if (!doses.length) return toast("Informe uma dose valida");
@@ -1683,8 +1837,14 @@ function renderProtocolChoices(containerId, groups, selectedKeys = []) {
 function selectedProtocolKeys(containerId) {
   return [...document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`)].map(input => input.value);
 }
+function protocolKeyNeedsHormoneSite(key) {
+  if (key === "hormones") return true;
+  if (!key.startsWith("custom:")) return false;
+  const id = key.slice(7);
+  return (activeProtocolSettings().protocols.custom.products || []).some(product => product.id === id && product.category === "hormone");
+}
 function syncSiteVisibility(containerId, wrapId) {
-  const show = selectedProtocolKeys(containerId).includes("hormones");
+  const show = selectedProtocolKeys(containerId).some(protocolKeyNeedsHormoneSite);
   document.getElementById(wrapId).style.display = show ? "grid" : "none";
 }
 function updatePlannedProtocolFields() {
@@ -1839,11 +1999,61 @@ document.getElementById("protocolForm").addEventListener("submit", (e) => {
     settings.protocols.hormone.rules.push(rule);
     settings.protocols.hormone.userEdited = true;
   } else {
-    const rule = { from, ghkDays: days, tbDays: days, tirzeDays: days };
-    settings.protocols.peptide.rules = settings.protocols.peptide.rules.filter(item => item.from !== from);
-    settings.protocols.peptide.rules.push(rule);
+    const current = activePeptideRule(new Date(from + "T00:00:00"), settings) || {};
+    const rule = { ...current, from };
+    if (type === "peptide") {
+      const product = document.getElementById("peptideProduct").value;
+      const dose = Number(document.getElementById("peptideDoseMg").value || 0);
+      if (product === "tb") {
+        rule.tbDays = days;
+        if (dose > 0) rule.tbDoseMg = dose;
+      } else {
+        rule.ghkDays = days;
+        if (dose > 0) rule.ghkDoseMg = dose;
+      }
+    }
+    if (type === "tirze") {
+      rule.tirzeDays = days;
+      rule.tirzeDoseMg = Number(document.getElementById("tirzeDoseMg").value || TIRZE_DOSE_MG);
+    }
+    if (type === "custom") {
+      const selected = document.getElementById("customProductMode").value;
+      const name = document.getElementById("customProductName").value.trim();
+      const dose = Number(document.getElementById("customProductDose").value || 0);
+      if (dose <= 0) return toast("Informe a dose do produto");
+      const products = settings.protocols.custom.products || [];
+      let product = products.find(item => item.id === selected);
+      if (!product) {
+        if (!name) return toast("Informe o nome do produto");
+        let id = productIdFromName(name);
+        let suffix = 2;
+        while (productCatalog(settings)[id] || products.some(item => item.id === id)) id = productIdFromName(name) + "_" + suffix++;
+        product = {
+          id,
+          name,
+          full: name,
+          category: document.getElementById("customProductCategory").value,
+          unit: document.getElementById("customProductUnit").value,
+          mgPerUnit: Number(document.getElementById("customProductMgPerUnit").value || 1),
+          initial: 0,
+          rules: []
+        };
+        products.push(product);
+      } else {
+        product.name = name || product.name;
+        product.full = product.name;
+        product.category = document.getElementById("customProductCategory").value;
+        product.unit = document.getElementById("customProductUnit").value;
+        product.mgPerUnit = Number(document.getElementById("customProductMgPerUnit").value || product.mgPerUnit || 1);
+      }
+      product.rules = (product.rules || []).filter(item => item.from !== from);
+      product.rules.push({ from, days, dose });
+      settings.protocols.custom.products = normalizeCustomProducts(products);
+    } else {
+      settings.protocols.peptide.rules = settings.protocols.peptide.rules.filter(item => item.from !== from);
+      settings.protocols.peptide.rules.push(rule);
+    }
   }
-  settings.protocols.ghk.daily = document.getElementById("ghkSchedule").value === "daily";
   data.settings = settings;
   save(data);
   toast("Protocolo atualizado");
@@ -1851,6 +2061,18 @@ document.getElementById("protocolForm").addEventListener("submit", (e) => {
 });
 document.getElementById("protocolType").addEventListener("change", renderProtocolDayList);
 document.getElementById("protocolFrom").addEventListener("change", renderProtocolDayList);
+document.getElementById("peptideProduct").addEventListener("change", updateProtocolForm);
+document.getElementById("customProductMode").addEventListener("change", () => {
+  const settings = activeProtocolSettings();
+  const selected = document.getElementById("customProductMode").value;
+  const product = (settings.protocols.custom.products || []).find(item => item.id === selected);
+  document.getElementById("customProductName").value = product?.name || "";
+  document.getElementById("customProductCategory").value = product?.category || "peptide";
+  document.getElementById("customProductUnit").value = product?.unit || "mg";
+  document.getElementById("customProductMgPerUnit").value = product?.mgPerUnit || 1;
+  document.getElementById("customProductDose").value = activeCustomRule(product || {}, new Date((document.getElementById("protocolFrom").value || isoDate(new Date())) + "T00:00:00"))?.dose || "";
+  renderProtocolDayList();
+});
 document.getElementById("recoverData").addEventListener("click", () => {
   let data = load();
   try {
