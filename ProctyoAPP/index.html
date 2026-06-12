@@ -1037,6 +1037,7 @@ function clone(value) {
   return JSON.parse(JSON.stringify(value));
 }
 function normalizeSettings(settings = {}) {
+  settings = settings || {};
   const defaults = clone(DEFAULT_SETTINGS);
   const protocols = settings.protocols || {};
   const hormone = protocols.hormone || {};
@@ -1127,7 +1128,7 @@ function cycleWeekLabel(date, start, weeks = null) {
   return "S" + protocolWeek(date, start);
 }
 function activeProtocolSettings() {
-  return normalizeSettings(readStoredData(STORAGE)?.settings);
+  return normalizeSettings(readStoredData(STORAGE)?.settings || {});
 }
 function activeHormoneRule(date, settings = activeProtocolSettings()) {
   const rules = (settings.protocols.hormone.rules || []).slice().sort((a, b) => a.from.localeCompare(b.from));
