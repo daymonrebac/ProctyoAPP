@@ -1,4 +1,4 @@
-const CACHE_NAME = "protocolos-v14";
+const CACHE_NAME = "protocolos-v15";
 const ASSETS = ["./", "./index.html", "./manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {

@@ -865,6 +865,38 @@ function readStoredData(key) {
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
 }
+function parseBackupText(text) {
+  const clean = String(text || "").replace(/^\uFEFF/, "").trim();
+  if (!clean) throw new Error("Arquivo vazio");
+  const assignment = clean.match(/(?:window\.)?PROCTYOAPP_SEED\s*=\s*([\s\S]*?);?\s*$/);
+  if (assignment) return JSON.parse(assignment[1]);
+  try {
+    return JSON.parse(clean);
+  } catch {
+    const firstObject = clean.indexOf("{");
+    const lastObject = clean.lastIndexOf("}");
+    const firstArray = clean.indexOf("[");
+    const lastArray = clean.lastIndexOf("]");
+    const objectCandidate = firstObject >= 0 && lastObject > firstObject ? clean.slice(firstObject, lastObject + 1) : "";
+    const arrayCandidate = firstArray >= 0 && lastArray > firstArray ? clean.slice(firstArray, lastArray + 1) : "";
+    if (objectCandidate) return JSON.parse(objectCandidate);
+    if (arrayCandidate) return JSON.parse(arrayCandidate);
+    throw new Error("JSON invalido");
+  }
+}
+function backupStats(data) {
+  return {
+    entries: entriesFromUnknownStorage(data).length,
+    weights: normalizeSeries(data?.weights).length,
+    waists: normalizeSeries(data?.waists).length,
+    stockAdds: Array.isArray(data?.stockAdds) ? data.stockAdds.length : 0,
+    ghkDoses: Array.isArray(data?.doses) ? data.doses.filter(d => d.compId === "ghkcu").length : 0
+  };
+}
+function backupHasImportableData(data) {
+  const stats = backupStats(data);
+  return stats.entries || stats.weights || stats.waists || stats.stockAdds || stats.ghkDoses || data?.settings;
+}
 function looksLikeDoseEntry(entry) {
   return entry && (Array.isArray(entry.doses) || entry.timestamp || entry.dt || entry.date || entry.data || entry.createdAt);
 }
@@ -961,11 +993,40 @@ function mergeData(base, extra) {
   if (!extra) return base;
   return {
     ...base,
-    entries: mergeMissingById(base.entries || [], entriesFromUnknownStorage(extra)),
+    entries: mergeMissingById(base.entries || [], [...entriesFromUnknownStorage(extra), ...entriesFromDoseBackup(extra)]),
     weights: mergeMissingById(base.weights || [], normalizeSeries(extra.weights)),
     waists: mergeMissingById(base.waists || [], normalizeSeries(extra.waists)),
     stockAdds: mergeMissingById(base.stockAdds || [], extra.stockAdds || [])
   };
+}
+function entriesFromDoseBackup(json) {
+  const doses = Array.isArray(json?.doses) ? json.doses : [];
+  if (!doses.length) return [];
+  const users = Number(json.compostos?.find(c => c.id === "ghkcu")?.usuarios || 2);
+  return doses.map(d => {
+    const comp = String(d.compId || "").toLowerCase();
+    const timestamp = new Date(d.dt || d.timestamp).getTime();
+    if (!Number.isFinite(timestamp)) return null;
+    if (comp === "ghkcu" && Number(d.mg) > 0) {
+      return {
+        id: "backup-ghk-" + (d.id || timestamp),
+        timestamp,
+        note: [d.local, d.obs, "backup GHK-CU"].filter(Boolean).join(" - "),
+        source: "backup-ghk",
+        doses: [{ product: "ghk", qty: Number(d.mg) * users, displayQty: Number(d.mg), route: "SC", label: Number(d.mg).toString().replace(".", ",") + " mg" }]
+      };
+    }
+    if (["tirze", "tirzepatida", "mounjaro", "monjaro"].some(x => comp.includes(x)) && Number(d.mg) > 0) {
+      return {
+        id: "backup-tirze-" + (d.id || timestamp),
+        timestamp,
+        note: [d.ui ? String(d.ui).replace(".", ",") + " UI" : "", d.freqDias ? d.freqDias + "d" : "", d.local, d.obs, "backup Tirzepatida"].filter(Boolean).join(" - "),
+        source: "backup-tirze",
+        doses: [{ product: "tirze", qty: Number(d.mg), displayQty: Number(d.mg), route: "SC", label: Number(d.mg).toString().replace(".", ",") + " mg" }]
+      };
+    }
+    return null;
+  }).filter(Boolean);
 }
 function mergeFullBackup(base, extra) {
   const merged = mergeData(base, extra);
@@ -1817,12 +1878,23 @@ document.getElementById("fullBackupInput").addEventListener("change", async (e) 
   const file = e.target.files?.[0];
   if (!file) return;
   try {
-    const data = mergeFullBackup(load(), JSON.parse(await file.text()));
+    const parsed = parseBackupText(await file.text());
+    if (!backupHasImportableData(parsed)) throw new Error("Nenhum dado reconhecido");
+    const before = load();
+    const data = mergeFullBackup(before, parsed);
     save(data);
-    toast("Backup completo importado");
+    const importedEntries = Math.max(0, (data.entries || []).length - (before.entries || []).length);
+    const importedWeights = Math.max(0, (data.weights || []).length - (before.weights || []).length);
+    const importedWaists = Math.max(0, (data.waists || []).length - (before.waists || []).length);
+    const importedStock = Math.max(0, (data.stockAdds || []).length - (before.stockAdds || []).length);
+    document.getElementById("dataDiag").textContent = `Backup importado: +${importedEntries} registros, +${importedWeights} pesos, +${importedWaists} cinturas, +${importedStock} estoques.`;
+    toast("Backup importado");
     render();
-  } catch {
+  } catch (err) {
+    document.getElementById("dataDiag").textContent = "Falha ao importar: " + (err?.message || "arquivo nao reconhecido");
     toast("Nao foi possivel importar o backup");
+  } finally {
+    e.target.value = "";
   }
 });
 function updateDilutionCalc() {
