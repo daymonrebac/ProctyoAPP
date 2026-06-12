@@ -1,0 +1,1886 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ProctyoAPP">
+<link rel="manifest" href="manifest.webmanifest">
+<title>ProctyoAPP</title>
+<style>
+:root {
+  --bg: #0b1110;
+  --panel: #121a18;
+  --panel-2: #18231f;
+  --line: #2b3a34;
+  --text: #edf7f2;
+  --muted: #91a59d;
+  --test: #4f8ef7;
+  --primo: #a855f7;
+  --npp: #14b8a6;
+  --ghk: #a855f7;
+  --tb: #ff6b8a;
+  --tirze: #2dd4bf;
+  --oral: #f59e0b;
+  --ok: #35d07f;
+  --warn: #ffbd4a;
+  --danger: #ff5d5d;
+  --safe-top: env(safe-area-inset-top);
+  --safe-bottom: env(safe-area-inset-bottom);
+}
+* { box-sizing: border-box; }
+html { background: var(--bg); }
+body {
+  margin: 0;
+  color: var(--text);
+  background:
+    radial-gradient(circle at 20% 0%, rgba(45,212,191,.13), transparent 27rem),
+    radial-gradient(circle at 90% 8%, rgba(245,158,11,.11), transparent 25rem),
+    var(--bg);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", sans-serif;
+  min-height: 100dvh;
+  letter-spacing: 0;
+}
+button, input, select, textarea { font: inherit; }
+button { -webkit-tap-highlight-color: transparent; }
+.shell {
+  width: min(100%, 480px);
+  min-height: 100dvh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+}
+.top {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  padding: calc(var(--safe-top) + 14px) 16px 12px;
+  background: rgba(11, 17, 16, .9);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.brand-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.brand h1 {
+  margin: 0;
+  font-size: 30px;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -.04em;
+  background: linear-gradient(135deg, #fff, var(--tirze));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.brand p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+.today-pill {
+  border: 1px solid var(--line);
+  background: rgba(45,212,191,.11);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 9px 10px;
+  text-align: right;
+  min-width: 92px;
+}
+.today-pill b { display: block; font-size: 14px; }
+.today-pill span { color: var(--muted); font-size: 12px; }
+nav.tabs {
+  position: fixed;
+  left: 50%;
+  bottom: 0;
+  transform: translateX(-50%);
+  z-index: 30;
+  width: min(100%, 480px);
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  margin-top: 0;
+  padding: 7px 8px calc(7px + var(--safe-bottom));
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: rgba(11,17,16,.97);
+  backdrop-filter: blur(24px);
+}
+.top nav.tabs { display: none; }
+button.tab {
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  border-radius: 10px;
+  padding: 9px 2px 10px;
+  font-size: 11px;
+  font-weight: 820;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+button.tab::before {
+  content: attr(data-icon);
+  display: block;
+  font-size: 19px;
+  line-height: 1;
+  margin-bottom: 3px;
+  text-transform: none;
+}
+button.tab.active {
+  color: var(--tirze);
+  background: transparent;
+  box-shadow: none;
+}
+button.tab.active::after {
+  content: "";
+  display: block;
+  width: 4px;
+  height: 4px;
+  margin: 5px auto 0;
+  border-radius: 999px;
+  background: var(--tirze);
+}
+main {
+  flex: 1;
+  padding: 14px 14px calc(var(--safe-bottom) + 88px);
+  overflow-x: hidden;
+}
+.page { display: none; }
+.page.active { display: block; }
+.hero {
+  border: 1px solid rgba(34,211,238,.32);
+  border-radius: 16px;
+  background: linear-gradient(160deg, #091b44 0%, #0d2255 100%);
+  padding: 18px;
+  margin-bottom: 12px;
+}
+.eyebrow {
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  font-weight: 760;
+}
+.next-title {
+  margin: 7px 0 2px;
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
+.next-sub { color: var(--muted); font-size: 15px; line-height: 1.48; }
+.hero-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 14px; }
+.btn {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  min-height: 44px;
+  padding: 10px 12px;
+  color: var(--text);
+  background: rgba(255,255,255,.05);
+  font-weight: 720;
+}
+.btn.primary { border: 0; background: linear-gradient(135deg, #0ea5c9, #2563d8); color: #fff; box-shadow: 0 4px 20px rgba(34,211,238,.24); }
+.btn.danger { color: var(--danger); }
+.stack { display: grid; gap: 12px; }
+.card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: linear-gradient(160deg, var(--panel) 0%, #121f42 100%);
+  padding: 16px;
+  box-shadow: 0 4px 16px rgba(0,0,0,.35);
+}
+.section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.section-title h2 {
+  margin: 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .12em;
+  color: var(--muted);
+}
+.section-title span { color: var(--muted); font-size: 13px; }
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.metric {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  background: rgba(255,255,255,.025);
+}
+.metric strong { display: block; font-size: 26px; line-height: 1.1; color: var(--tirze); letter-spacing: -.03em; }
+.metric span { display: block; margin-top: 5px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+.alert-card {
+  display: none;
+  margin-bottom: 12px;
+  border-color: rgba(255,189,74,.36);
+  background: linear-gradient(135deg, rgba(255,189,74,.12), rgba(18,22,26,.96));
+}
+.alert-card.show { display: block; }
+.alert-card .detail { margin-top: 6px; }
+.dose-list { display: grid; gap: 8px; }
+.dose-row, .stock-row, .log-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.dose-row:last-child, .stock-row:last-child, .log-row:last-child { border-bottom: 0; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+.name { font-size: 16px; font-weight: 740; }
+.detail { color: var(--muted); font-size: 14px; margin-top: 3px; line-height: 1.38; }
+.amount { text-align: right; font-size: 16px; font-weight: 800; }
+.amount small { display: block; color: var(--muted); font-size: 12px; font-weight: 560; margin-top: 2px; }
+.progress {
+  height: 9px;
+  background: #0b0e11;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,.06);
+}
+.bar { height: 100%; width: 0%; background: var(--ok); border-radius: 999px; }
+.status-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 12px;
+  margin-top: 6px;
+}
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 5px 9px;
+  min-width: 68px;
+  color: #07100c;
+  font-size: 12px;
+  font-weight: 820;
+  background: var(--ok);
+}
+.badge.warn { background: var(--warn); color: #160f02; }
+.badge.danger { background: var(--danger); color: #190606; }
+.calendar { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 6px; width: 100%; overflow: hidden; }
+.day {
+  min-height: 58px;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 7px 4px;
+  background: rgba(255,255,255,.025);
+  overflow: hidden;
+}
+.day.today { border-color: var(--tirze); background: rgba(34,211,238,.10); }
+.day b { display: block; font-size: 12px; line-height: 1.15; overflow-wrap: anywhere; }
+.day span { display: block; margin-top: 5px; font-size: 10px; line-height: 1.16; color: var(--muted); overflow-wrap: anywhere; }
+.day.has-dose span { color: var(--text); }
+.timeline { display: grid; gap: 9px; }
+.phase {
+  border-left: 3px solid var(--test);
+  padding: 10px 10px 10px 12px;
+  background: rgba(255,255,255,.025);
+  border-radius: 0 12px 12px 0;
+}
+.phase h3 { margin: 0 0 4px; font-size: 16px; }
+.phase p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.42; }
+.body-map {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+.body-svg {
+  width: 132px;
+  height: 210px;
+}
+.body-base {
+  fill: #182028;
+  stroke: var(--line);
+  stroke-width: 2;
+}
+.site-point {
+  fill: #2b3540;
+  stroke: rgba(255,255,255,.28);
+  stroke-width: 2;
+}
+.site-point.active {
+  fill: var(--test);
+  stroke: var(--text);
+}
+.site-point.week {
+  fill: var(--warn);
+  stroke: var(--text);
+}
+.site-list { display: grid; gap: 8px; }
+.site-chip {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 9px 10px;
+  background: #101419;
+  color: var(--muted);
+  font-size: 13px;
+}
+.site-chip strong { color: var(--text); }
+.chart-box {
+  width: 100%;
+  min-height: 210px;
+}
+.chart-svg {
+  width: 100%;
+  height: 210px;
+  display: block;
+}
+.chart-grid {
+  stroke: rgba(255,255,255,.08);
+  stroke-width: 1;
+}
+.chart-line {
+  fill: none;
+  stroke: var(--test);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.chart-fill { opacity: .16; }
+.chart-point { fill: var(--test); stroke: var(--panel); stroke-width: 2; }
+.chart-label { fill: var(--muted); font-size: 10px; font-weight: 650; }
+.chart-empty { color: var(--muted); text-align: center; padding: 72px 10px; font-size: 14px; }
+.split-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+form { display: grid; gap: 10px; }
+label { display: grid; gap: 6px; color: var(--muted); font-size: 14px; font-weight: 700; }
+.check-list { display: grid; gap: 8px; }
+.check-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 10px;
+  background: #101419;
+  color: var(--text);
+}
+.check-row input { width: 18px; min-height: 18px; }
+.check-row span { display: block; color: var(--muted); font-size: 12px; margin-top: 2px; }
+input, select, textarea {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  min-height: 44px;
+  padding: 10px 11px;
+}
+textarea { min-height: 72px; resize: vertical; }
+.form-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.form-grid > label,
+.grid-2 > *,
+.split-metrics > * { min-width: 0; }
+input, select, textarea { min-width: 0; }
+.empty { color: var(--muted); text-align: center; padding: 28px 12px; font-size: 15px; }
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 22px);
+  transform: translateX(-50%) translateY(18px);
+  opacity: 0;
+  z-index: 40;
+  background: var(--ok);
+  color: #041008;
+  border-radius: 8px;
+  padding: 12px 15px;
+  font-size: 13px;
+  font-weight: 780;
+  transition: .25s ease;
+  max-width: calc(100% - 28px);
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+.fineprint { color: var(--muted); font-size: 13px; line-height: 1.45; }
+details.fold {
+  margin-top: 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(255,255,255,.025);
+  overflow: hidden;
+}
+details.fold summary {
+  cursor: pointer;
+  padding: 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 800;
+  list-style: none;
+}
+details.fold summary::-webkit-details-marker { display: none; }
+details.fold summary::after {
+  content: "+";
+  float: right;
+  color: var(--muted);
+}
+details.fold[open] summary::after { content: "-"; }
+details.fold > .fold-content { padding: 0 12px 12px; }
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 35;
+  display: none;
+  align-items: end;
+  justify-content: center;
+  padding: 14px;
+  background: rgba(0,0,0,.58);
+}
+.modal.show { display: flex; }
+.modal-panel {
+  width: min(100%, 460px);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 16px;
+  background: linear-gradient(180deg,#0d1e48,#091530);
+  padding: 14px;
+  box-shadow: 0 18px 60px rgba(0,0,0,.44);
+}
+.modal-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+@media (min-width: 780px) {
+  .shell { width: min(100%, 980px); }
+  nav.tabs { width: min(100%, 980px); }
+  main { display: grid; }
+  .desktop-grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 12px; align-items: start; }
+}
+@media (max-width: 430px) {
+  .form-grid { grid-template-columns: 1fr; }
+  .log-row {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+  .log-row .btn {
+    grid-column: 2;
+    justify-self: end;
+    width: auto;
+    min-height: 38px;
+    padding: 8px 12px;
+  }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header class="top">
+    <div class="brand-row">
+      <div class="brand">
+        <h1>ProctyoAPP</h1>
+        <p>Ciclos, manipulados, estoque e evolucao</p>
+      </div>
+      <div class="today-pill">
+        <b id="todayDow">--</b>
+        <span id="todayDate">--</span>
+      </div>
+    </div>
+    <nav class="tabs">
+      <button class="tab active" data-page="home" data-icon="⌂">Hoje</button>
+      <button class="tab" data-page="stock" data-icon="▣">Estoque</button>
+      <button class="tab" data-page="plan" data-icon="◇">Ciclo</button>
+      <button class="tab" data-page="evolution" data-icon="⌁">Evolucao</button>
+      <button class="tab" data-page="log" data-icon="+">Registro</button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="page active" id="page-home">
+      <div class="desktop-grid">
+        <div>
+          <div class="hero">
+            <div class="eyebrow">Proxima acao</div>
+            <div class="next-title" id="nextTitle">--</div>
+            <div class="next-sub" id="nextSub">--</div>
+            <div class="hero-actions">
+              <button class="btn primary" id="quickDone">Registrar hoje</button>
+              <button class="btn" data-page-jump="log">Abrir registro</button>
+            </div>
+          </div>
+          <div class="card alert-card" id="pendingCard">
+            <div class="name">Aplicacao pendente hoje</div>
+            <div class="detail" id="pendingText">--</div>
+          </div>
+          <div class="card">
+            <div class="section-title"><h2>Agenda da semana</h2><span id="weekLabel">--</span></div>
+            <div class="calendar" id="weekGrid"></div>
+          </div>
+        </div>
+        <div class="stack">
+          <div class="card">
+            <div class="section-title"><h2>Resumo</h2><span id="cycleDay">semanas atuais</span></div>
+            <div class="grid-2">
+              <div class="metric"><strong id="hormoneWeek">--</strong><span>Hormonios</span></div>
+              <div class="metric"><strong id="ghkWeek">--</strong><span>GHK-CU</span></div>
+              <div class="metric"><strong id="tbWeek">--</strong><span>TB-500</span></div>
+              <div class="metric"><strong id="nextChange">--</strong><span>Proxima mudanca</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="section-title"><h2>Doses de hoje</h2><span id="todayDoseCount">--</span></div>
+            <div class="dose-list" id="todayDoses"></div>
+          </div>
+          <div class="card">
+            <div class="section-title"><h2>Locais hormonios</h2><span id="siteWeekLabel">semana atual</span></div>
+            <div class="body-map">
+              <svg class="body-svg" viewBox="0 0 132 210" role="img" aria-label="Mapa corporal de aplicacoes hormonais">
+                <circle class="body-base" cx="66" cy="21" r="16"></circle>
+                <rect class="body-base" x="48" y="42" width="36" height="78" rx="16"></rect>
+                <path class="body-base" d="M48 49 L26 88 L37 94 L55 64 Z"></path>
+                <path class="body-base" d="M84 49 L106 88 L95 94 L77 64 Z"></path>
+                <path class="body-base" d="M54 118 L43 188 L56 190 L66 124 Z"></path>
+                <path class="body-base" d="M78 118 L89 188 L76 190 L66 124 Z"></path>
+                <circle class="site-point" data-site-point="Deltoide E" cx="42" cy="58" r="7"></circle>
+                <circle class="site-point" data-site-point="Deltoide D" cx="90" cy="58" r="7"></circle>
+                <circle class="site-point" data-site-point="Ventro-gluteo E" cx="43" cy="92" r="7"></circle>
+                <circle class="site-point" data-site-point="Ventro-gluteo D" cx="89" cy="92" r="7"></circle>
+                <circle class="site-point" data-site-point="Gluteo E" cx="55" cy="105" r="7"></circle>
+                <circle class="site-point" data-site-point="Gluteo D" cx="77" cy="105" r="7"></circle>
+                <circle class="site-point" data-site-point="Coxa E" cx="52" cy="150" r="7"></circle>
+                <circle class="site-point" data-site-point="Coxa D" cx="80" cy="150" r="7"></circle>
+              </svg>
+              <div class="site-list">
+                <div class="site-chip"><span>Ultima aplicacao</span><strong id="lastHormoneSite">--</strong></div>
+                <div class="site-chip"><span>Ultimos 14 dias</span><strong id="weekHormoneSite">--</strong></div>
+                <div class="site-chip"><span>Sugestao</span><strong id="suggestedHormoneSite">--</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-stock">
+      <div class="stack">
+        <div class="card">
+          <div class="section-title"><h2>Estoque projetado</h2><span>base atualizada</span></div>
+          <div id="stockList"></div>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Adicionar estoque</h2><span>sem perder historico</span></div>
+          <form id="stockForm">
+            <div class="form-grid">
+              <label>Produto
+                <select id="stockProduct">
+                  <option value="test">Enantato de Testosterona</option>
+                  <option value="primo">Enantato de Metenolona</option>
+                  <option value="npp">NPP</option>
+                  <option value="ghk">GHK-CU</option>
+                  <option value="tb">TB-500</option>
+                  <option value="tirze">Tirzepatida</option>
+                  <option value="escitalopram">Escitalopram</option>
+                  <option value="omega3">Omega 3</option>
+                  <option value="saw">Saw Palmetto</option>
+                  <option value="sili_nac_alc">Silimarina + NAC</option>
+                  <option value="natto_castanha">Natto + Castanha</option>
+                  <option value="alio_coq10">Allyl ABG + CoQ10</option>
+                  <option value="rosuvastatina">Rosuvastatina</option>
+                </select>
+              </label>
+              <label>Quantidade<input type="number" id="stockQty" min="0" step="0.1" placeholder="ml, mg, caps ou comp" required></label>
+            </div>
+            <label>Observacao<input id="stockNote" placeholder="Ex.: novo frasco, lote, validade"></label>
+            <button class="btn primary" type="submit">Adicionar ao estoque</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Seguranca dos dados</h2><span id="dataStatus">localStorage</span></div>
+          <div class="form-grid">
+            <button class="btn" type="button" id="recoverData">Reprocessar dados locais</button>
+            <button class="btn primary" type="button" id="exportData">Exportar backup</button>
+          </div>
+          <label style="margin-top:10px">Importar backup completo
+            <input type="file" id="fullBackupInput" accept="application/json,.json">
+          </label>
+          <p class="fineprint" id="dataDiag" style="margin-bottom:0;margin-top:10px">Use antes de novas atualizacoes do Netlify para guardar uma copia do historico deste aparelho.</p>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Calculadora de diluicao</h2><span>seringa U-100</span></div>
+          <div class="form-grid">
+            <label>Produto liofilizado (mg)<input type="number" id="calcTotalMg" min="0" step="0.1" value="100"></label>
+            <label>Agua bacteriostatica (ml)<input type="number" id="calcWaterMl" min="0" step="0.1" value="10"></label>
+          </div>
+          <div class="form-grid" style="margin-top:10px">
+            <label>Dose desejada (mg)<input type="number" id="calcDoseMg" min="0" step="0.1" value="1"></label>
+            <label>Resultado<input id="calcResult" readonly value="10 UI"></label>
+          </div>
+          <p class="fineprint" id="calcDetail" style="margin-bottom:0;margin-top:10px">100 mg em 10 ml = 10 mg/ml. Para 1 mg, aspirar 10 UI.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-plan">
+      <div class="stack">
+        <div class="card">
+          <div class="section-title"><h2>Ajustar protocolo</h2><span>vale a partir da data</span></div>
+          <form id="protocolForm">
+            <div class="form-grid">
+              <label>Inicio da regra<input type="date" id="protocolFrom" required></label>
+              <label>Tipo de ajuste
+                <select id="protocolType">
+                  <option value="hormone">Hormonios</option>
+                  <option value="peptide">Peptideos / Tirzepatida</option>
+                </select>
+              </label>
+            </div>
+            <div class="check-list" id="protocolDayList" style="margin-top:10px"></div>
+            <div class="form-grid" id="hormoneDoseFields" style="margin-top:10px">
+              <label>Enantato de Testosterona ml<input type="number" id="hormoneTestMl" min="0" step="0.1" value="0.5"></label>
+              <label>Enantato de Metenolona ml<input type="number" id="hormonePrimoMl" min="0" step="0.1" value="1"></label>
+              <label>NPP ml<input type="number" id="hormoneNppMl" min="0" step="0.1" value="0.5"></label>
+            </div>
+            <div class="form-grid" id="peptideFields" style="margin-top:10px">
+              <label>GHK-CU
+                <select id="ghkSchedule">
+                  <option value="daily">Todos os dias</option>
+                  <option value="weekdays">Segunda a sexta</option>
+                </select>
+              </label>
+            </div>
+            <button class="btn primary" type="submit">Salvar ajuste de protocolo</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Status do ciclo</h2><span id="cycleStatusLabel">atual</span></div>
+          <div class="timeline" id="cycleStatusList"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-evolution">
+      <div class="stack">
+        <div class="card">
+          <div class="section-title"><h2>Peso</h2><span id="weightSummary">--</span></div>
+          <div class="split-metrics">
+            <div class="metric"><strong id="weightStart">--</strong><span>Inicio</span></div>
+            <div class="metric"><strong id="weightCurrent">--</strong><span>Atual</span></div>
+            <div class="metric"><strong id="weightDelta">--</strong><span>Perdido</span></div>
+          </div>
+          <div class="chart-box" id="weightChart"></div>
+          <form id="weightForm" style="margin-top:12px">
+            <div class="form-grid">
+              <label>Peso kg<input type="number" id="weightValue" min="0" step="0.05" required></label>
+              <label>Data<input type="datetime-local" id="weightDate" required></label>
+            </div>
+            <button class="btn primary" type="submit">Registrar peso</button>
+          </form>
+          <details class="fold"><summary>Ver registros de peso</summary><div id="weightList" class="dose-list fold-content"></div></details>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Cintura</h2><span id="waistSummary">--</span></div>
+          <div class="split-metrics">
+            <div class="metric"><strong id="waistStart">--</strong><span>Inicio</span></div>
+            <div class="metric"><strong id="waistCurrent">--</strong><span>Atual</span></div>
+            <div class="metric"><strong id="waistDelta">--</strong><span>Reducao</span></div>
+          </div>
+          <div class="chart-box" id="waistChart"></div>
+          <form id="waistForm" style="margin-top:12px">
+            <div class="form-grid">
+              <label>Cintura cm<input type="number" id="waistValue" min="0" step="0.1" required></label>
+              <label>Data<input type="datetime-local" id="waistDate" required></label>
+            </div>
+            <button class="btn primary" type="submit">Registrar cintura</button>
+          </form>
+          <details class="fold"><summary>Ver registros de cintura</summary><div id="waistList" class="dose-list fold-content"></div></details>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Tirzepatida</h2><span>mg por semana</span></div>
+          <div class="chart-box" id="tirzeChart"></div>
+          <details class="fold"><summary>Ver registros de doses</summary><div id="tirzeList" class="dose-list fold-content"></div></details>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="page-log">
+      <div class="desktop-grid">
+        <div class="card">
+          <div class="section-title"><h2>Novo registro</h2><span>abate estoque</span></div>
+          <form id="logForm">
+            <div class="form-grid">
+              <label>Data<input type="date" id="entryDate" required></label>
+              <label>Horario<input type="time" id="entryTime" required></label>
+            </div>
+            <label>Tipo
+              <select id="entryKind">
+                <option value="planned">Aplicacao planejada do dia</option>
+                <option value="custom">Registro manual / ajuste</option>
+              </select>
+            </label>
+            <div id="plannedFields">
+              <label>Protocolos do horario</label>
+              <div class="check-list" id="plannedProtocolList"></div>
+              <label id="plannedSiteWrap">Local hormonios
+                <select id="plannedHormoneSite"></select>
+              </label>
+            </div>
+            <div class="form-grid" id="customFields" style="display:none">
+              <label>Produto
+                <select id="entryProduct">
+                  <option value="test">Enantato de Testosterona</option>
+                  <option value="primo">Enantato de Metenolona</option>
+                  <option value="npp">NPP</option>
+                  <option value="ghk">GHK-CU</option>
+                  <option value="tb">TB-500</option>
+                  <option value="tirze">Tirzepatida</option>
+                  <option value="escitalopram">Escitalopram</option>
+                  <option value="omega3">Omega 3</option>
+                  <option value="saw">Saw Palmetto</option>
+                  <option value="sili_nac_alc">Silimarina + NAC</option>
+                  <option value="natto_castanha">Natto + Castanha</option>
+                  <option value="alio_coq10">Allyl ABG + CoQ10</option>
+                  <option value="rosuvastatina">Rosuvastatina</option>
+                </select>
+              </label>
+              <label>Quantidade<input type="number" id="entryQty" min="0" step="0.1" placeholder="ml, mg, caps ou comp"></label>
+            </div>
+            <label>Observacao<textarea id="entryNote" placeholder="Local, lote, reacao, ajuste de dose..."></textarea></label>
+            <button class="btn primary" type="submit">Salvar registro</button>
+          </form>
+        </div>
+        <div class="card">
+          <div class="section-title"><h2>Historico</h2><span id="logCount">0 itens</span></div>
+          <details class="fold"><summary>Ver historico completo</summary><div id="logList" class="fold-content"></div></details>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+<nav class="tabs">
+  <button class="tab active" data-page="home" data-icon="⌂">Hoje</button>
+  <button class="tab" data-page="stock" data-icon="□">Estoque</button>
+  <button class="tab" data-page="plan" data-icon="◇">Ciclo</button>
+  <button class="tab" data-page="evolution" data-icon="⌁">Evolucao</button>
+  <button class="tab" data-page="log" data-icon="+">Registro</button>
+</nav>
+<div class="modal" id="protocolModal" aria-modal="true" role="dialog">
+  <div class="modal-panel">
+    <div class="section-title"><h2>Registrar agora</h2><span id="protocolModalDate">hoje</span></div>
+    <div class="check-list" id="quickProtocolList"></div>
+    <label id="quickSiteWrap" style="margin-top:10px">Local hormonios
+      <select id="quickHormoneSite"></select>
+    </label>
+    <div class="modal-actions">
+      <button class="btn" id="cancelProtocol" type="button">Cancelar</button>
+      <button class="btn primary" id="saveProtocol" type="button">Salvar</button>
+    </div>
+  </div>
+</div>
+<div class="modal" id="pendingModal" aria-modal="true" role="dialog">
+  <div class="modal-panel">
+    <div class="section-title"><h2>Pendente hoje</h2><span id="pendingModalDate">--</span></div>
+    <div class="detail" id="pendingModalText">--</div>
+    <div class="modal-actions">
+      <button class="btn" id="dismissPending" type="button">Depois</button>
+      <button class="btn primary" id="openPendingRegister" type="button">Registrar</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const HORMONE_START = new Date("2026-05-14T08:00:00");
+const TB_START = new Date("2026-05-13T08:00:00");
+const GHK_START = new Date("2026-04-26T08:00:00");
+const TIRZE_START = new Date("2026-06-07T08:00:00");
+const START = GHK_START;
+const DAY = 86400000;
+const STORAGE = "protocolos_v2";
+const LEGACY_STORAGE_KEYS = ["protocolos", "protocolos_v1", "protocolos_v2", "protocolos_v3", "protocolos_v4"];
+const LEGACY_USED = { test: 5, primo: 15 };
+const TIRZE_DOSE_MG = 9.6;
+
+const PRODUCTS = {
+  test: { name: "Enantato de Testosterona", full: "Enantato de Testosterona", color: "var(--test)", unit: "ml", mgPerUnit: 250, initial: 30 },
+  primo: { name: "Enantato de Metenolona", full: "Enantato de Metenolona", color: "var(--primo)", unit: "ml", mgPerUnit: 100, initial: 40 },
+  npp: { name: "NPP", full: "Fenilpropionato de Nandrolona", color: "var(--npp)", unit: "ml", mgPerUnit: 100, initial: 20 },
+  ghk: { name: "GHK-CU", full: "GHK-CU compartilhado", color: "var(--ghk)", unit: "mg", mgPerUnit: 1, initial: 700 },
+  tb: { name: "TB-500", full: "TB-500", color: "var(--tb)", unit: "mg", mgPerUnit: 1, initial: 40 },
+  tirze: { name: "Tirzepatida", full: "Tirzepatida", color: "var(--tirze)", unit: "mg", mgPerUnit: 1, initial: 180 },
+  escitalopram: { name: "Escitalopram", full: "Escitalopram 20 mg", color: "var(--oral)", unit: "comp", mgPerUnit: 20, initial: 0 },
+  omega3: { name: "Omega 3", full: "Omega 3 1000 mg EPA540/DHA360", color: "var(--oral)", unit: "caps", mgPerUnit: 1000, initial: 0 },
+  saw: { name: "Saw Palmetto", full: "Saw Palmetto 320 mg", color: "var(--oral)", unit: "caps", mgPerUnit: 320, initial: 0 },
+  sili_nac_alc: { name: "Silimarina + NAC", full: "100 mg Silimarina + 1 g NAC + 300 mg Alcachofra", color: "var(--oral)", unit: "caps", mgPerUnit: 1, initial: 0 },
+  natto_castanha: { name: "Natto + Castanha", full: "150 mg Nattokinase + 50 mg Castanha da India", color: "var(--oral)", unit: "caps", mgPerUnit: 1, initial: 0 },
+  alio_coq10: { name: "Allyl ABG + CoQ10", full: "Allyl ABG 125 mg + CoQ10 100 mg", color: "var(--oral)", unit: "caps", mgPerUnit: 1, initial: 60 },
+  rosuvastatina: { name: "Rosuvastatina", full: "Rosuvastatina 5 mg", color: "var(--oral)", unit: "comp", mgPerUnit: 5, initial: 0 }
+};
+const HORMONE_PRODUCTS = ["test", "primo", "npp"];
+const ORAL_PRODUCTS = ["escitalopram", "omega3", "saw", "sili_nac_alc", "natto_castanha", "alio_coq10", "rosuvastatina"];
+const HORMONE_SITES = ["Gluteo D", "Gluteo E", "Ventro-gluteo D", "Ventro-gluteo E", "Coxa D", "Coxa E", "Deltoide D", "Deltoide E"];
+const DEFAULT_SETTINGS = {
+  protocols: {
+    hormone: {
+      rules: [
+        { from: "2026-05-31", days: [0, 3], doses: { test: .5, primo: 1, npp: .5 } }
+      ],
+      userEdited: false
+    },
+    ghk: { daily: true },
+    peptide: {
+      rules: [
+        { from: "2026-06-11", ghkDays: [0, 1, 2, 3, 4, 5, 6], tbDays: [1, 3, 5], tirzeDays: [0] }
+      ]
+    }
+  }
+};
+
+function seedEntries() {
+  return [];
+}
+function currentSeedData() {
+  return { entries: [], weights: [], waists: [], stockAdds: [], settings: null };
+}
+function normalizeSeries(items) {
+  return (items || []).map(item => ({
+    id: item.id || Date.now() + Math.random(),
+    value: Number(item.value),
+    dt: item.dt,
+    obs: item.obs || ""
+  })).filter(item => Number.isFinite(item.value) && item.dt);
+}
+function mergeMissingById(current, seed) {
+  const ids = new Set((current || []).map(item => item.id));
+  return [...(current || []), ...seed.filter(item => !ids.has(item.id))];
+}
+function readStoredData(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+function looksLikeDoseEntry(entry) {
+  return entry && (Array.isArray(entry.doses) || entry.timestamp || entry.dt || entry.date || entry.data || entry.createdAt);
+}
+function legacyProductKey(value = "") {
+  const text = String(value).toLowerCase();
+  if (["test", "testenat", "testosterona", "enantato"].some(x => text.includes(x))) return "test";
+  if (["primo", "primobolan", "metenolona"].some(x => text.includes(x))) return "primo";
+  if (text.includes("npp") || text.includes("nandrolona")) return "npp";
+  if (text.includes("ghk")) return "ghk";
+  if (text.includes("tb")) return "tb";
+  if (["tirze", "tirzepatida", "mounjaro", "monjaro"].some(x => text.includes(x))) return "tirze";
+  if (["escitalopram", "ecitalopram", "lexapro"].some(x => text.includes(x))) return "escitalopram";
+  if (["omega", "epa", "dha"].some(x => text.includes(x))) return "omega3";
+  if (["saw", "palmetto"].some(x => text.includes(x))) return "saw";
+  if (["silimarina", "nac", "alcachofra"].some(x => text.includes(x))) return "sili_nac_alc";
+  if (["nattokinase", "castanha"].some(x => text.includes(x))) return "natto_castanha";
+  if (["alio", "alho", "coq10"].some(x => text.includes(x))) return "alio_coq10";
+  if (["rosuvastatina", "rosuva"].some(x => text.includes(x))) return "rosuvastatina";
+  return "";
+}
+function legacyTimestamp(entry) {
+  const raw = entry.timestamp || entry.dt || entry.date || entry.data || entry.createdAt;
+  if (Number(raw) > 1000000000000) return Number(raw);
+  if (entry.date && entry.time) return new Date(entry.date + "T" + entry.time).getTime();
+  return new Date(raw).getTime();
+}
+function normalizeLegacyDose(dose) {
+  const product = legacyProductKey(dose.product || dose.produto || dose.compId || dose.name || dose.nome || dose.tipo);
+  if (!product) return null;
+  const rawQty = Number(dose.qty ?? dose.quantidade ?? dose.ml ?? dose.mg ?? dose.value ?? dose.valor ?? 0);
+  if (!Number.isFinite(rawQty) || rawQty <= 0) return null;
+  const p = PRODUCTS[product];
+  const displayQty = Number(dose.displayQty ?? dose.mg ?? rawQty);
+  const qty = product === "ghk" && !dose.qty ? rawQty * 2 : rawQty;
+  const unit = product === "test" || product === "primo" || product === "npp" ? "ml" : p.unit;
+  return {
+    product,
+    qty,
+    displayQty,
+    route: dose.route || dose.via || (unit === "ml" ? "IM" : ORAL_PRODUCTS.includes(product) ? "VO" : "SC"),
+    label: dose.label || displayQty.toString().replace(".", ",") + " " + unit
+  };
+}
+function normalizeEntry(entry) {
+  if (!looksLikeDoseEntry(entry)) return null;
+  const timestamp = legacyTimestamp(entry);
+  let doses = Array.isArray(entry.doses) ? entry.doses.map(normalizeLegacyDose).filter(Boolean) : [];
+  if (!doses.length) {
+    const single = normalizeLegacyDose(entry);
+    if (single) doses = [single];
+  }
+  if (!Number.isFinite(timestamp) || !doses.length) return null;
+  return {
+    ...entry,
+    id: entry.id || "recovered-" + timestamp + "-" + Math.random().toString(36).slice(2),
+    timestamp,
+    doses,
+    note: entry.note || entry.obs || entry.observacao || ""
+  };
+}
+function entriesFromUnknownStorage(value) {
+  if (!value) return [];
+  if (Array.isArray(value)) return value.map(normalizeEntry).filter(Boolean);
+  if (Array.isArray(value.entries)) return value.entries.map(normalizeEntry).filter(Boolean);
+  if (Array.isArray(value.registros)) return value.registros.map(normalizeEntry).filter(Boolean);
+  if (Array.isArray(value.logs)) return value.logs.map(normalizeEntry).filter(Boolean);
+  if (Array.isArray(value.aplicacoes)) return value.aplicacoes.map(normalizeEntry).filter(Boolean);
+  if (Array.isArray(value.applications)) return value.applications.map(normalizeEntry).filter(Boolean);
+  return [];
+}
+function scanLocalStorageForEntries() {
+  const found = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      const value = readStoredData(key);
+      found.push(...entriesFromUnknownStorage(value));
+    }
+  } catch {}
+  return found;
+}
+function localStorageReport() {
+  const rows = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      const value = readStoredData(key);
+      rows.push({ key, entries: entriesFromUnknownStorage(value).length });
+    }
+  } catch {}
+  return rows;
+}
+function mergeData(base, extra) {
+  if (!extra) return base;
+  return {
+    ...base,
+    entries: mergeMissingById(base.entries || [], entriesFromUnknownStorage(extra)),
+    weights: mergeMissingById(base.weights || [], normalizeSeries(extra.weights)),
+    waists: mergeMissingById(base.waists || [], normalizeSeries(extra.waists)),
+    stockAdds: mergeMissingById(base.stockAdds || [], extra.stockAdds || [])
+  };
+}
+function mergeFullBackup(base, extra) {
+  const merged = mergeData(base, extra);
+  if (extra?.settings) merged.settings = normalizeSettings(extra.settings);
+  return normalizeData(merged);
+}
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+function normalizeSettings(settings = {}) {
+  const defaults = clone(DEFAULT_SETTINGS);
+  const protocols = settings.protocols || {};
+  const hormone = protocols.hormone || {};
+  const ghk = protocols.ghk || {};
+  const peptide = protocols.peptide || {};
+  let hormoneRules = Array.isArray(hormone.rules) && hormone.rules.length ? hormone.rules : defaults.protocols.hormone.rules;
+  const hasAutoInsertedNewRule = !hormone.userEdited
+    && hormoneRules.length === 2
+    && hormoneRules.some(rule => rule.from === "2026-05-14" && (rule.days || []).join(",") === "1,4" && Number(rule.doses?.test) === .5 && Number(rule.doses?.primo) === .5 && Number(rule.doses?.npp) === .5)
+    && hormoneRules.some(rule => rule.from === "2026-05-31" && (rule.days || []).join(",") === "0,3" && Number(rule.doses?.test) === .5 && Number(rule.doses?.primo) === 1 && Number(rule.doses?.npp) === .5);
+  if (hasAutoInsertedNewRule) hormoneRules = defaults.protocols.hormone.rules;
+  return {
+    protocols: {
+      hormone: {
+        ...defaults.protocols.hormone,
+        ...hormone,
+        rules: hormoneRules,
+        userEdited: Boolean(hormone.userEdited)
+      },
+      ghk: { ...defaults.protocols.ghk, ...ghk },
+      peptide: {
+        ...defaults.protocols.peptide,
+        ...peptide,
+        rules: Array.isArray(peptide.rules) && peptide.rules.length ? peptide.rules : defaults.protocols.peptide.rules
+      }
+    }
+  };
+}
+function normalizeData(data) {
+  const base = data || {};
+  const entries = Array.isArray(base.entries) ? base.entries : [];
+  const seed = currentSeedData();
+  const shouldSeed = base.seedVersion !== "public-empty-v1";
+  return {
+    ...base,
+    seedVersion: "public-empty-v1",
+    entries: shouldSeed ? mergeMissingById(entries, seed.entries) : entries,
+    weights: shouldSeed ? mergeMissingById(normalizeSeries(base.weights), seed.weights) : normalizeSeries(base.weights),
+    waists: shouldSeed ? mergeMissingById(normalizeSeries(base.waists), seed.waists) : normalizeSeries(base.waists),
+    stockAdds: shouldSeed ? mergeMissingById(Array.isArray(base.stockAdds) ? base.stockAdds : [], seed.stockAdds) : Array.isArray(base.stockAdds) ? base.stockAdds : [],
+    settings: normalizeSettings(base.settings || seed.settings)
+  };
+}
+function load() {
+  const fallback = normalizeData({ entries: [], weights: [], waists: [] });
+  let data = normalizeData(readStoredData(STORAGE) || fallback);
+  for (const key of LEGACY_STORAGE_KEYS) {
+    if (key !== STORAGE) data = mergeData(data, readStoredData(key));
+  }
+  data.entries = mergeMissingById(data.entries || [], scanLocalStorageForEntries());
+  return normalizeData(data);
+}
+function save(data) { localStorage.setItem(STORAGE, JSON.stringify(data)); }
+function fmtDate(date, opts = {}) { return date.toLocaleDateString("pt-BR", opts); }
+function isoDate(date) {
+  const d = new Date(date);
+  d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+  return d.toISOString().slice(0, 10);
+}
+function isoTime(date) {
+  return String(date.getHours()).padStart(2, "0") + ":" + String(date.getMinutes()).padStart(2, "0");
+}
+function localDateTime(date) {
+  return isoDate(date) + "T" + isoTime(date);
+}
+function weekNumber(date, start = GHK_START) {
+  return Math.max(1, Math.floor((startOfDay(date) - startOfDay(start)) / (7 * DAY)) + 1);
+}
+function startOfDay(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  return d;
+}
+function addDays(date, n) {
+  const d = new Date(date);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+function protocolWeek(date, start) {
+  return Math.max(1, Math.floor((startOfDay(date) - startOfDay(start)) / (7 * DAY)) + 1);
+}
+function withinWeeks(date, start, weeks) {
+  return startOfDay(date) >= startOfDay(start) && startOfDay(date) < addDays(startOfDay(start), weeks * 7);
+}
+function cycleWeekLabel(date, start, weeks = null) {
+  if (startOfDay(date) < startOfDay(start)) return "Pre";
+  if (weeks && !withinWeeks(date, start, weeks)) return "Fim";
+  return "S" + protocolWeek(date, start);
+}
+function activeProtocolSettings() {
+  return normalizeSettings(readStoredData(STORAGE)?.settings);
+}
+function activeHormoneRule(date, settings = activeProtocolSettings()) {
+  const rules = (settings.protocols.hormone.rules || []).slice().sort((a, b) => a.from.localeCompare(b.from));
+  const day = isoDate(date);
+  return rules.filter(rule => rule.from <= day).pop() || rules[0];
+}
+function activePeptideRule(date, settings = activeProtocolSettings()) {
+  const rules = (settings.protocols.peptide.rules || []).slice().sort((a, b) => a.from.localeCompare(b.from));
+  const day = isoDate(date);
+  return rules.filter(rule => rule.from <= day).pop() || rules[0];
+}
+function dosePlanFor(date) {
+  const dow = date.getDay();
+  const doses = [];
+  const settings = activeProtocolSettings();
+  const hormoneRule = activeHormoneRule(date, settings);
+  const peptideRule = activePeptideRule(date, settings);
+  if (date >= startOfDay(HORMONE_START) && hormoneRule.days.includes(dow)) {
+    for (const product of HORMONE_PRODUCTS) {
+      const qty = Number(hormoneRule.doses?.[product] || 0);
+      if (qty > 0) doses.push({ product, qty, route: "IM", label: qty.toString().replace(".", ",") + " ml" });
+    }
+  }
+  if (withinWeeks(date, GHK_START, 26)) {
+    const ghkWeek = protocolWeek(date, GHK_START);
+    const ghkDose = ghkWeek <= 4 ? 1 : ghkWeek <= 8 ? 1.5 : 2;
+    const ghkDays = Array.isArray(peptideRule.ghkDays) ? peptideRule.ghkDays : (settings.protocols.ghk.daily ? [0, 1, 2, 3, 4, 5, 6] : [1, 2, 3, 4, 5]);
+    if (ghkDays.includes(dow)) {
+      doses.push({ product: "ghk", qty: ghkDose * 2, displayQty: ghkDose, route: "SC", label: ghkDose.toString().replace(".", ",") + " mg" });
+    }
+  }
+  if (withinWeeks(date, TB_START, 26) && (peptideRule.tbDays || [1, 3, 5]).includes(dow)) {
+    const tbWeek = protocolWeek(date, TB_START);
+    const tbDose = tbWeek <= 4 ? 2 : 1;
+    doses.push({ product: "tb", qty: tbDose, route: "SC", label: tbDose + " mg" });
+  }
+  if (date >= startOfDay(TIRZE_START) && (peptideRule.tirzeDays || [0]).includes(dow)) {
+    doses.push({ product: "tirze", qty: TIRZE_DOSE_MG, displayQty: TIRZE_DOSE_MG, route: "SC", label: "9,6 mg" });
+  }
+  if (date >= startOfDay(new Date("2026-06-11T08:00:00"))) {
+    doses.push({ product: "escitalopram", qty: 1, displayQty: 20, route: "VO", label: "20 mg" });
+    doses.push({ product: "sili_nac_alc", qty: 1, route: "VO", label: "1 caps", period: "manha" });
+    doses.push({ product: "natto_castanha", qty: 1, route: "VO", label: "1 caps", period: "manha" });
+    doses.push({ product: "omega3", qty: 1, route: "VO", label: "1 caps", period: "manha" });
+    doses.push({ product: "alio_coq10", qty: 1, route: "VO", label: "1 caps" });
+    doses.push({ product: "rosuvastatina", qty: 1, displayQty: 5, route: "VO", label: "5 mg" });
+    doses.push({ product: "omega3", qty: 1, route: "VO", label: "1 caps", period: "noite" });
+    doses.push({ product: "saw", qty: 1, route: "VO", label: "1 caps" });
+  }
+  return doses;
+}
+function plannedProtocolGroups(date) {
+  const doses = dosePlanFor(date);
+  const groups = [];
+  const hormoneDoses = doses.filter(d => HORMONE_PRODUCTS.includes(d.product));
+  if (hormoneDoses.length) {
+    groups.push({ key: "hormones", name: "Hormonios", detail: summarizeDoses(hormoneDoses), doses: hormoneDoses });
+  }
+  const ghk = doses.filter(d => d.product === "ghk");
+  if (ghk.length) groups.push({ key: "ghk", name: "GHK-CU", detail: summarizeDoses(ghk), doses: ghk });
+  const tb = doses.filter(d => d.product === "tb");
+  if (tb.length) groups.push({ key: "tb", name: "TB-500", detail: summarizeDoses(tb), doses: tb });
+  const tirze = doses.filter(d => d.product === "tirze");
+  if (tirze.length) groups.push({ key: "tirze", name: "Tirzepatida", detail: summarizeDoses(tirze), doses: tirze });
+  const morning = doses.filter(d => ["sili_nac_alc", "natto_castanha", "alio_coq10", "rosuvastatina"].includes(d.product) || d.period === "manha");
+  if (morning.length) groups.push({ key: "manipulados_manha", name: "Manipulados manha", detail: summarizeDoses(morning), doses: morning });
+  const escitalopram = doses.filter(d => d.product === "escitalopram");
+  if (escitalopram.length) groups.push({ key: "escitalopram", name: "Escitalopram", detail: summarizeDoses(escitalopram), doses: escitalopram });
+  const night = doses.filter(d => d.product === "saw" || d.period === "noite");
+  if (night.length) groups.push({ key: "manipulados_noite", name: "Manipulados noite", detail: summarizeDoses(night), doses: night });
+  return groups;
+}
+function isSameDay(a, b) {
+  return isoDate(a) === isoDate(b);
+}
+function entriesForDay(entries, date) {
+  return entries.filter(entry => isSameDay(new Date(entry.timestamp), date));
+}
+function protocolKeysForEntry(entry) {
+  if (Array.isArray(entry.protocols) && entry.protocols.length) return entry.protocols;
+  const keys = new Set();
+  for (const dose of entry.doses || []) {
+    if (HORMONE_PRODUCTS.includes(dose.product)) keys.add("hormones");
+    if (dose.product === "ghk") keys.add("ghk");
+    if (dose.product === "tb") keys.add("tb");
+    if (dose.product === "tirze") keys.add("tirze");
+    if (["sili_nac_alc", "natto_castanha", "omega3", "alio_coq10", "rosuvastatina"].includes(dose.product)) keys.add("manipulados_manha");
+    if (dose.product === "escitalopram") keys.add("escitalopram");
+    if (dose.product === "saw") keys.add("manipulados_noite");
+  }
+  return [...keys];
+}
+function pendingProtocolGroups(entries, date) {
+  const done = new Set(entriesForDay(entries, date).flatMap(protocolKeysForEntry));
+  return plannedProtocolGroups(date).filter(group => !done.has(group.key));
+}
+function plannedConsumptionUntil(date) {
+  const totals = Object.fromEntries(Object.keys(PRODUCTS).map(k => [k, 0]));
+  for (let d = startOfDay(START); d <= startOfDay(date); d = addDays(d, 1)) {
+    for (const dose of dosePlanFor(d)) totals[dose.product] += dose.qty;
+  }
+  return totals;
+}
+function entriesConsumption(entries) {
+  const totals = Object.fromEntries(Object.keys(PRODUCTS).map(k => [k, Number(LEGACY_USED[k] || 0)]));
+  for (const entry of entries) {
+    for (const dose of entry.doses || []) {
+      if (dose.product in totals) totals[dose.product] += Number(dose.qty || 0);
+    }
+  }
+  return totals;
+}
+function stockAdditions(stockAdds = []) {
+  const totals = Object.fromEntries(Object.keys(PRODUCTS).map(k => [k, 0]));
+  for (const add of stockAdds || []) {
+    if (add.product in totals) totals[add.product] += Number(add.qty || 0);
+  }
+  return totals;
+}
+function stockSnapshot(entries, stockAdds = []) {
+  const used = entriesConsumption(entries);
+  const added = stockAdditions(stockAdds);
+  return Object.entries(PRODUCTS).map(([key, p]) => {
+    const initial = p.initial + added[key];
+    const left = initial - used[key];
+    const depletion = findDepletionDate(key, left, entries);
+    const lastPlanned = lastPlannedDateFor(key);
+    return { key, ...p, initial, added: added[key], used: used[key], left, depletion, lastPlanned };
+  });
+}
+function plannedDosesForProjection(date, entries) {
+  if (isSameDay(date, new Date())) return pendingProtocolGroups(entries, date).flatMap(group => group.doses);
+  return dosePlanFor(date);
+}
+function findDepletionDate(key, currentLeft, entries) {
+  if (key === "tirze") return tirzeDepletionDate(currentLeft, entries);
+  let balance = currentLeft;
+  for (let i = 0; i < 730; i++) {
+    const date = addDays(new Date(), i);
+    const dayUse = plannedDosesForProjection(date, entries).filter(d => d.product === key).reduce((s, d) => s + d.qty, 0);
+    if (dayUse > 0) balance -= dayUse;
+    if (balance < 0) return date;
+  }
+  return null;
+}
+function tirzeDepletionDate(currentLeft, entries) {
+  const tirzeEntries = entries.filter(entry => (entry.doses || []).some(d => d.product === "tirze")).sort((a, b) => b.timestamp - a.timestamp);
+  if (!tirzeEntries.length || currentLeft <= 0) return currentLeft <= 0 ? new Date() : null;
+  const last = tirzeEntries[0];
+  const dose = (last.doses || []).find(d => d.product === "tirze");
+  const mg = Number(dose?.qty || 0);
+  const freqMatch = (last.note || "").match(/(\d+)\s*d/);
+  const freq = freqMatch ? Number(freqMatch[1]) : 7;
+  if (!mg || !freq) return null;
+  return addDays(new Date(), Math.floor((currentLeft / mg) * freq));
+}
+function lastPlannedDateFor(key) {
+  let last = null;
+  for (let i = 0; i < 730; i++) {
+    const date = addDays(new Date(), i);
+    const dayUse = dosePlanFor(date).some(d => d.product === key);
+    if (dayUse) last = date;
+  }
+  return last;
+}
+function nextDoseDate(from = new Date()) {
+  for (let i = 0; i < 30; i++) {
+    const d = addDays(from, i);
+    if (dosePlanFor(d).length) return d;
+  }
+  return null;
+}
+function changeInfo(date = new Date()) {
+  const today = startOfDay(date).getTime();
+  const changes = [
+    { label: "GHK 1,5 mg", date: addDays(GHK_START, 28), text: "GHK-CU passa para 1,5 mg" },
+    { label: "GHK 2 mg", date: addDays(GHK_START, 56), text: "GHK-CU passa para 2 mg" },
+    { label: "TB 1 mg", date: addDays(TB_START, 28), text: "TB-500 passa para 1 mg" },
+    { label: "TB fim", date: addDays(TB_START, 182), text: "TB-500 completa 26 semanas" },
+    { label: "GHK fim", date: addDays(GHK_START, 182), text: "GHK-CU completa 26 semanas" }
+  ].filter(item => startOfDay(item.date).getTime() >= today)
+    .sort((a, b) => startOfDay(a.date) - startOfDay(b.date));
+  if (changes.length) {
+    const next = changes[0];
+    const dateLabel = fmtDate(next.date, { day: "2-digit", month: "2-digit" });
+    return { ...next, label: `${next.label} ${dateLabel}`, text: `${next.text} em ${dateLabel}` };
+  }
+  return { label: "Estavel", date: null, text: "Sem mudanca programada" };
+}
+function weekStart(date) {
+  return addDays(startOfDay(date), -date.getDay());
+}
+function hormoneSiteFromEntry(entry) {
+  if (entry.hormoneSite) return entry.hormoneSite;
+  const note = entry.note || "";
+  return HORMONE_SITES.find(site => note.toLowerCase().includes(site.toLowerCase())) || "";
+}
+function hormoneEntries(entries) {
+  return entries.filter(entry => protocolKeysForEntry(entry).includes("hormones"));
+}
+function lastHormoneEntry(entries) {
+  return hormoneEntries(entries).slice().sort((a, b) => b.timestamp - a.timestamp)[0] || null;
+}
+function hormoneEntriesThisWeek(entries, date) {
+  const start = addDays(startOfDay(date), -13).getTime();
+  const end = addDays(startOfDay(date), 1).getTime();
+  return hormoneEntries(entries).filter(entry => entry.timestamp >= start && entry.timestamp < end);
+}
+function suggestedHormoneSite(entries, date) {
+  const weekSites = new Set(hormoneEntriesThisWeek(entries, date).map(hormoneSiteFromEntry).filter(Boolean));
+  const lastSite = hormoneSiteFromEntry(lastHormoneEntry(entries) || {});
+  return HORMONE_SITES.find(site => !weekSites.has(site) && site !== lastSite) || HORMONE_SITES.find(site => !weekSites.has(site)) || HORMONE_SITES[0];
+}
+function updateBodyMap(entries, date) {
+  const last = lastHormoneEntry(entries);
+  const lastSite = hormoneSiteFromEntry(last || {});
+  const weekSites = hormoneEntriesThisWeek(entries, date).map(hormoneSiteFromEntry).filter(Boolean);
+  document.getElementById("lastHormoneSite").textContent = lastSite || "sem registro";
+  document.getElementById("weekHormoneSite").textContent = weekSites.length ? [...new Set(weekSites)].join(", ") : "nenhum";
+  document.getElementById("suggestedHormoneSite").textContent = suggestedHormoneSite(entries, date);
+  document.getElementById("siteWeekLabel").textContent = fmtDate(addDays(startOfDay(date), -13), { day: "2-digit", month: "2-digit" }) + " a " + fmtDate(startOfDay(date), { day: "2-digit", month: "2-digit" });
+  document.querySelectorAll("[data-site-point]").forEach(point => {
+    const site = point.dataset.sitePoint;
+    point.classList.toggle("active", site === lastSite);
+    point.classList.toggle("week", weekSites.includes(site) && site !== lastSite);
+  });
+}
+function updateProtocolForm(date = new Date()) {
+  const from = document.getElementById("protocolFrom");
+  if (!from.value) from.value = isoDate(date);
+  const settings = activeProtocolSettings();
+  const rule = activeHormoneRule(date, settings);
+  document.getElementById("hormoneTestMl").value = rule.doses?.test ?? .5;
+  document.getElementById("hormonePrimoMl").value = rule.doses?.primo ?? 1;
+  document.getElementById("hormoneNppMl").value = rule.doses?.npp ?? .5;
+  document.getElementById("ghkSchedule").value = settings.protocols.ghk.daily ? "daily" : "weekdays";
+  renderProtocolDayList();
+}
+function protocolDaysForForm() {
+  const type = document.getElementById("protocolType").value;
+  const date = new Date((document.getElementById("protocolFrom").value || isoDate(new Date())) + "T00:00:00");
+  const settings = activeProtocolSettings();
+  if (type === "peptide") return activePeptideRule(date, settings).tirzeDays || [0];
+  return activeHormoneRule(date, settings).days || [0, 3];
+}
+function renderProtocolDayList() {
+  syncProtocolFormMode();
+  const days = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+  const selected = new Set(protocolDaysForForm().map(Number));
+  document.getElementById("protocolDayList").innerHTML = days.map((label, i) => (
+    `<label class="check-row"><input type="checkbox" value="${i}" ${selected.has(i) ? "checked" : ""}><div><strong>${label}</strong><span>Dia ativo</span></div></label>`
+  )).join("");
+}
+function syncProtocolFormMode() {
+  const type = document.getElementById("protocolType").value;
+  document.getElementById("hormoneDoseFields").style.display = type === "hormone" ? "grid" : "none";
+  document.getElementById("peptideFields").style.display = type === "peptide" ? "grid" : "none";
+}
+function selectedProtocolDays() {
+  return [...document.querySelectorAll("#protocolDayList input[type='checkbox']:checked")].map(input => Number(input.value));
+}
+function updateDataDiagnostics(data) {
+  const report = localStorageReport();
+  const sources = report.filter(row => row.entries > 0);
+  const stockAdds = (data.stockAdds || []).length;
+  document.getElementById("dataStatus").textContent = `${data.entries.length} registros`;
+  document.getElementById("dataDiag").textContent = sources.length
+    ? `Encontrado: ${sources.map(row => `${row.key} (${row.entries})`).join(", ")}. Estoque extra: ${stockAdds}.`
+    : `Nenhuma chave antiga com registros detectada. Historico atual: ${data.entries.length} registros. Estoque extra: ${stockAdds}.`;
+}
+function render() {
+  const data = load();
+  const now = new Date();
+  document.getElementById("todayDow").textContent = fmtDate(now, { weekday: "short" }).replace(".", "");
+  document.getElementById("todayDate").textContent = fmtDate(now, { day: "2-digit", month: "2-digit" });
+  document.getElementById("hormoneWeek").textContent = cycleWeekLabel(now, HORMONE_START);
+  document.getElementById("ghkWeek").textContent = cycleWeekLabel(now, GHK_START, 26);
+  document.getElementById("tbWeek").textContent = cycleWeekLabel(now, TB_START, 26);
+  const change = changeInfo(now);
+  document.getElementById("cycleDay").textContent = "Proxima: " + change.text;
+  document.getElementById("nextChange").textContent = change.label;
+  const next = nextDoseDate(now);
+  const todayDoses = dosePlanFor(startOfDay(now));
+  const pending = pendingProtocolGroups(data.entries, startOfDay(now));
+  document.getElementById("nextTitle").textContent = next ? fmtDate(next, { weekday: "long", day: "numeric", month: "long" }) : "Sem dose prevista";
+  document.getElementById("nextSub").textContent = next ? summarizeDoses(dosePlanFor(next)) : "Nada programado nos proximos dias.";
+  document.getElementById("todayDoseCount").textContent = todayDoses.length ? todayDoses.length + " itens" : "livre";
+  document.getElementById("pendingCard").classList.toggle("show", pending.length > 0);
+  document.getElementById("pendingText").textContent = pending.length ? pending.map(group => group.name).join(" + ") : "";
+  renderDoseList("todayDoses", todayDoses);
+  renderWeek(now);
+  renderStock(data.entries, data.stockAdds);
+  renderCycleStatus(now);
+  renderEvolution(data);
+  renderLog(data.entries);
+  updateBodyMap(data.entries, now);
+  updateProtocolForm(now);
+  updateDataDiagnostics(data);
+  updatePlannedProtocolFields();
+  maybeShowPendingModal(pending, now);
+}
+function renderCycleStatus(now) {
+  const change = changeInfo(now);
+  const settings = activeProtocolSettings();
+  const hormoneRule = activeHormoneRule(now, settings);
+  const peptideRule = activePeptideRule(now, settings);
+  const dayLabels = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sab"];
+  const daysText = days => (days || []).map(d => dayLabels[d]).join(", ") || "--";
+  document.getElementById("cycleStatusLabel").textContent = change.label;
+  document.getElementById("cycleStatusList").innerHTML = [
+    `<div class="phase" style="border-color:var(--test)"><h3>Hormonios ${cycleWeekLabel(now, HORMONE_START)}</h3><p>Dias: ${daysText(hormoneRule.days)}. Dose: ${fmtNum(hormoneRule.doses?.test || 0)} ml testosterona + ${fmtNum(hormoneRule.doses?.primo || 0)} ml metenolona + ${fmtNum(hormoneRule.doses?.npp || 0)} ml NPP.</p></div>`,
+    `<div class="phase" style="border-color:var(--ghk)"><h3>Peptideos ${cycleWeekLabel(now, GHK_START, 26)}</h3><p>GHK-CU dias: ${daysText(peptideRule.ghkDays)}. TB-500 dias: ${daysText(peptideRule.tbDays)}.</p></div>`,
+    `<div class="phase" style="border-color:var(--tirze)"><h3>Tirzepatida</h3><p>Dias: ${daysText(peptideRule.tirzeDays)}. Dose programada: ${fmtNum(TIRZE_DOSE_MG)} mg.</p></div>`,
+    `<div class="phase" style="border-color:var(--ok)"><h3>Proxima mudanca</h3><p>${change.text}</p></div>`
+  ].join("");
+}
+function summarizeDoses(doses) {
+  return doses.map(d => PRODUCTS[d.product].name + " " + d.label + " " + d.route).join(" + ");
+}
+function shortDoseName(product) {
+  if (HORMONE_PRODUCTS.includes(product)) return "Horm";
+  if (["ghk", "tb", "tirze"].includes(product)) return "Peps";
+  return "";
+}
+function renderDoseList(id, doses) {
+  const el = document.getElementById(id);
+  if (!doses.length) {
+    el.innerHTML = '<div class="empty">Nenhuma aplicacao planejada para hoje.</div>';
+    return;
+  }
+  el.innerHTML = doses.map(d => doseHtml(d)).join("");
+}
+function doseHtml(d) {
+  const p = PRODUCTS[d.product];
+  const shared = d.product === "ghk" ? "Estoque abate " + d.qty.toString().replace(".", ",") + " mg por ser compartilhado" : p.full;
+  const mg = Math.round(d.qty * p.mgPerUnit * 10) / 10;
+  const small = d.product === "ghk" ? "individual" : mg.toString().replace(".", ",") + " mg";
+  const amount = ["ghk", "tb", "tirze"].includes(d.product) ? mg.toString().replace(".", ",") + " mg" : d.label;
+  return `<div class="dose-row"><span class="dot" style="background:${p.color}"></span><div><div class="name">${p.name}</div><div class="detail">${shared} - ${d.route}</div></div><div class="amount">${amount}<small>${small}</small></div></div>`;
+}
+function renderWeek(now) {
+  const grid = document.getElementById("weekGrid");
+  const start = addDays(startOfDay(now), -now.getDay());
+  document.getElementById("weekLabel").textContent = fmtDate(start, { day: "2-digit", month: "2-digit" }) + " a " + fmtDate(addDays(start, 6), { day: "2-digit", month: "2-digit" });
+  let html = "";
+  for (let i = 0; i < 7; i++) {
+    const d = addDays(start, i);
+    const doses = dosePlanFor(d);
+    const cls = ["day", doses.length ? "has-dose" : "", isoDate(d) === isoDate(now) ? "today" : ""].join(" ");
+    const names = [...new Set(doses.map(x => shortDoseName(x.product)).filter(Boolean))].join(", ");
+    html += `<div class="${cls}"><b>${fmtDate(d, { weekday: "short" }).slice(0,3)} ${d.getDate()}</b><span>${names || "Livre"}</span></div>`;
+  }
+  grid.innerHTML = html;
+}
+function renderStock(entries, stockAdds = []) {
+  const list = stockSnapshot(entries, stockAdds);
+  document.getElementById("stockList").innerHTML = list.map(item => {
+    const pct = item.initial > 0 ? Math.max(0, Math.min(100, item.left / item.initial * 100)) : 0;
+    const displayDate = item.depletion || item.lastPlanned;
+    const days = displayDate ? Math.ceil((startOfDay(displayDate) - startOfDay(new Date())) / DAY) : 999;
+    const klass = days < 14 ? "danger" : days < 35 ? "warn" : "";
+    const label = item.initial <= 0 ? "sem saldo" : displayDate ? fmtDate(displayDate, { day: "2-digit", month: "2-digit", year: "2-digit" }) : "sem uso";
+    const status = item.initial <= 0 ? "cadastre o estoque atual" : item.depletion ? "previsao ate " + label : item.lastPlanned ? "nao acaba ate " + label : "sem uso previsto";
+    const left = Math.max(0, item.left).toFixed(item.unit === "ml" ? 1 : 0).replace(".", ",");
+    const used = item.used.toFixed(item.unit === "ml" ? 1 : 0).replace(".", ",");
+    const extra = item.added > 0 ? ` · +${item.added.toFixed(item.unit === "ml" ? 1 : 0).replace(".", ",")} ${item.unit}` : "";
+    return `<div class="stock-row">
+      <span class="dot" style="background:${item.color}"></span>
+      <div>
+        <div class="name">${item.name}</div>
+        <div class="detail">${left} ${item.unit} restante · usado ${used} ${item.unit}${extra}</div>
+        <div class="progress"><div class="bar" style="width:${pct}%;background:${item.color}"></div></div>
+        <div class="status-line"><span>${Math.round(pct)}% disponivel</span><span>${status}</span></div>
+      </div>
+      <span class="badge ${klass}">${label}</span>
+    </div>`;
+  }).join("");
+}
+function renderUpcoming(now) {
+  const rows = [];
+  for (let i = 0; i < 14; i++) {
+    const d = addDays(now, i);
+    const doses = dosePlanFor(d);
+    if (doses.length) rows.push(`<div class="dose-row"><span class="dot" style="background:var(--ok)"></span><div><div class="name">${fmtDate(d, { weekday: "long", day: "numeric", month: "short" })}</div><div class="detail">${summarizeDoses(doses)}</div></div><div class="amount">S${weekNumber(d)}<small>semana</small></div></div>`);
+  }
+  document.getElementById("upcomingList").innerHTML = rows.join("") || '<div class="empty">Nenhum item nos proximos 14 dias.</div>';
+}
+function sortedSeries(items) {
+  return (items || []).slice().sort((a, b) => new Date(a.dt) - new Date(b.dt));
+}
+function fmtNum(value, digits = 1) {
+  return Number(value || 0).toFixed(digits).replace(".", ",");
+}
+function renderLineChart(id, items, color, unit, goal = null) {
+  const el = document.getElementById(id);
+  const points = sortedSeries(items).filter(item => Number.isFinite(Number(item.value)));
+  if (points.length < 2) {
+    el.innerHTML = '<div class="chart-empty">Dados insuficientes para grafico.</div>';
+    return;
+  }
+  const w = 360, h = 210, pad = 28;
+  const values = points.map(p => Number(p.value));
+  if (goal !== null) values.push(goal);
+  const min = Math.min(...values);
+  const max = Math.max(...values);
+  const span = max - min || 1;
+  const x = i => pad + (i / Math.max(1, points.length - 1)) * (w - pad * 2);
+  const y = value => h - pad - ((value - min) / span) * (h - pad * 2);
+  const path = points.map((p, i) => `${i ? "L" : "M"}${x(i).toFixed(1)} ${y(Number(p.value)).toFixed(1)}`).join(" ");
+  const area = `${path} L${x(points.length - 1).toFixed(1)} ${h - pad} L${x(0).toFixed(1)} ${h - pad} Z`;
+  const grid = [0, 1, 2, 3].map(i => {
+    const gy = pad + i * ((h - pad * 2) / 3);
+    return `<line class="chart-grid" x1="${pad}" y1="${gy}" x2="${w - pad}" y2="${gy}"></line>`;
+  }).join("");
+  const goalLine = goal === null ? "" : `<line x1="${pad}" y1="${y(goal)}" x2="${w - pad}" y2="${y(goal)}" stroke="var(--ok)" stroke-width="2" stroke-dasharray="6 6"></line>`;
+  const circles = points.map((p, i) => `<circle class="chart-point" cx="${x(i).toFixed(1)}" cy="${y(Number(p.value)).toFixed(1)}" r="4"></circle>`).join("");
+  const firstLabel = fmtDate(new Date(points[0].dt), { day: "2-digit", month: "2-digit" });
+  const lastLabel = fmtDate(new Date(points[points.length - 1].dt), { day: "2-digit", month: "2-digit" });
+  el.innerHTML = `<svg class="chart-svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    ${grid}${goalLine}
+    <path class="chart-fill" d="${area}" fill="${color}"></path>
+    <path class="chart-line" d="${path}" style="stroke:${color}"></path>
+    ${circles}
+    <text class="chart-label" x="${pad}" y="${h - 7}">${firstLabel}</text>
+    <text class="chart-label" x="${w - pad - 38}" y="${h - 7}">${lastLabel}</text>
+    <text class="chart-label" x="${pad}" y="16">${fmtNum(max)} ${unit}</text>
+    <text class="chart-label" x="${pad}" y="${h - pad + 15}">${fmtNum(min)} ${unit}</text>
+  </svg>`;
+}
+function weeklyTirzeSeries(entries) {
+  const weeks = new Map();
+  for (const entry of entries) {
+    const tirzeDose = (entry.doses || []).filter(d => d.product === "tirze").reduce((sum, d) => sum + Number(d.qty || 0), 0);
+    if (!tirzeDose) continue;
+    const start = weekStart(new Date(entry.timestamp));
+    const key = isoDate(start);
+    weeks.set(key, (weeks.get(key) || 0) + tirzeDose);
+  }
+  return [...weeks.entries()].sort(([a], [b]) => a.localeCompare(b)).map(([dt, value]) => ({ dt: dt + "T12:00:00", value }));
+}
+function latestValue(items) {
+  const sorted = sortedSeries(items);
+  return sorted.length ? sorted[sorted.length - 1] : null;
+}
+function renderSeriesList(id, items, unit, color) {
+  const sorted = sortedSeries(items).slice().reverse();
+  document.getElementById(id).innerHTML = sorted.slice(0, 8).map(item => {
+    const date = new Date(item.dt);
+    return `<div class="dose-row"><span class="dot" style="background:${color}"></span><div><div class="name">${fmtNum(item.value)} ${unit}</div><div class="detail">${fmtDate(date, { day: "2-digit", month: "2-digit", year: "2-digit" })}${item.obs ? " · " + item.obs : ""}</div></div></div>`;
+  }).join("") || '<div class="empty">Nenhum registro.</div>';
+}
+function renderTirzeList(entries) {
+  const rows = entries.filter(entry => (entry.doses || []).some(d => d.product === "tirze")).slice().sort((a, b) => b.timestamp - a.timestamp);
+  document.getElementById("tirzeList").innerHTML = rows.slice(0, 8).map(entry => {
+    const dose = (entry.doses || []).find(d => d.product === "tirze");
+    const date = new Date(entry.timestamp);
+    const mg = Number(dose.qty || 0).toString().replace(".", ",") + " mg";
+    return `<div class="dose-row"><span class="dot" style="background:var(--tirze)"></span><div><div class="name">${mg}</div><div class="detail">${fmtDate(date, { day: "2-digit", month: "2-digit", year: "2-digit" })}${entry.note ? " - " + entry.note : ""}</div></div></div>`;
+  }).join("") || '<div class="empty">Nenhuma dose de Tirzepatida.</div>';
+}
+function renderEvolution(data) {
+  const weights = sortedSeries(data.weights);
+  const waists = sortedSeries(data.waists);
+  const wStart = weights[0], wNow = latestValue(weights);
+  const waistStart = waists[0], waistNow = latestValue(waists);
+  document.getElementById("weightStart").textContent = wStart ? fmtNum(wStart.value) : "--";
+  document.getElementById("weightCurrent").textContent = wNow ? fmtNum(wNow.value) : "--";
+  document.getElementById("weightDelta").textContent = wStart && wNow ? fmtNum(wStart.value - wNow.value) : "--";
+  document.getElementById("weightSummary").textContent = wNow ? "meta 75,0 kg" : "--";
+  document.getElementById("waistStart").textContent = waistStart ? fmtNum(waistStart.value) : "--";
+  document.getElementById("waistCurrent").textContent = waistNow ? fmtNum(waistNow.value) : "--";
+  document.getElementById("waistDelta").textContent = waistStart && waistNow ? fmtNum(waistStart.value - waistNow.value) : "--";
+  document.getElementById("waistSummary").textContent = waistNow ? "abdominal" : "--";
+  renderLineChart("weightChart", weights, "#4f8ef7", "kg", 75);
+  renderLineChart("waistChart", waists, "#14b8a6", "cm");
+  renderLineChart("tirzeChart", weeklyTirzeSeries(data.entries), "#22d3ee", "mg");
+  renderSeriesList("weightList", weights, "kg", "var(--tirze)");
+  renderSeriesList("waistList", waists, "cm", "var(--npp)");
+  renderTirzeList(data.entries);
+}
+function renderLog(entries) {
+  document.getElementById("logCount").textContent = entries.length + (entries.length === 1 ? " item" : " itens");
+  const list = document.getElementById("logList");
+  if (!entries.length) {
+    list.innerHTML = '<div class="empty">Nenhum registro salvo ainda.</div>';
+    return;
+  }
+  list.innerHTML = entries.slice().sort((a,b) => b.timestamp - a.timestamp).map(entry => {
+    const d = new Date(entry.timestamp);
+    return `<div class="log-row"><span class="dot" style="background:var(--test)"></span><div><div class="name">${fmtDate(d, { weekday: "long", day: "numeric", month: "short" })} · ${isoTime(d)}</div><div class="detail">${summarizeDoses(entry.doses || [])}${entry.note ? " · " + entry.note : ""}</div></div><button class="btn danger" onclick="deleteEntry('${entry.id}')">Apagar</button></div>`;
+  }).join("");
+}
+function addEntry(date, note = "", kind = "planned", selectedProtocols = null, meta = {}) {
+  const data = load();
+  let doses = [];
+  const entry = { id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), timestamp: date.getTime(), note, doses };
+  if (kind === "planned") {
+    const groups = plannedProtocolGroups(startOfDay(date));
+    const selected = Array.isArray(selectedProtocols) && selectedProtocols.length ? selectedProtocols : groups.map(group => group.key);
+    doses = groups.filter(group => selected.includes(group.key)).flatMap(group => group.doses);
+    entry.protocols = selected;
+    if (selected.includes("hormones") && meta.hormoneSite) {
+      entry.hormoneSite = meta.hormoneSite;
+      entry.note = [meta.hormoneSite, note].filter(Boolean).join(" - ");
+    }
+  }
+  if (kind === "custom") {
+    const product = document.getElementById("entryProduct").value;
+    const qty = Number(document.getElementById("entryQty").value || 0);
+    if (qty > 0) {
+      const p = PRODUCTS[product];
+      const storedQty = product === "ghk" ? qty * 2 : qty;
+      doses = [{ product, qty: storedQty, displayQty: qty, route: HORMONE_PRODUCTS.includes(product) ? "IM" : ORAL_PRODUCTS.includes(product) ? "VO" : "SC", label: qty.toString().replace(".", ",") + " " + p.unit }];
+    }
+  }
+  if (!doses.length) return toast("Informe uma dose valida");
+  entry.doses = doses;
+  data.entries.push(entry);
+  save(data);
+  toast("Registro salvo");
+  render();
+}
+function deleteEntry(id) {
+  const data = load();
+  data.entries = data.entries.filter(e => e.id !== id);
+  save(data);
+  toast("Registro removido");
+  render();
+}
+function toast(message) {
+  const t = document.getElementById("toast");
+  t.textContent = message;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 1800);
+}
+function setSiteOptions(selectId, preferred = "") {
+  const select = document.getElementById(selectId);
+  select.innerHTML = HORMONE_SITES.map(site => `<option value="${site}">${site}</option>`).join("");
+  select.value = preferred && HORMONE_SITES.includes(preferred) ? preferred : HORMONE_SITES[0];
+}
+function renderProtocolChoices(containerId, groups, selectedKeys = []) {
+  const container = document.getElementById(containerId);
+  if (!groups.length) {
+    container.innerHTML = '<div class="empty">Nenhum protocolo planejado para esta data.</div>';
+    return;
+  }
+  container.innerHTML = groups.map(group => {
+    const checked = selectedKeys.includes(group.key) ? "checked" : "";
+    return `<label class="check-row"><input type="checkbox" value="${group.key}" ${checked}><div><strong>${group.name}</strong><span>${group.detail}</span></div></label>`;
+  }).join("");
+}
+function selectedProtocolKeys(containerId) {
+  return [...document.querySelectorAll(`#${containerId} input[type="checkbox"]:checked`)].map(input => input.value);
+}
+function syncSiteVisibility(containerId, wrapId) {
+  const show = selectedProtocolKeys(containerId).includes("hormones");
+  document.getElementById(wrapId).style.display = show ? "grid" : "none";
+}
+function updatePlannedProtocolFields() {
+  const dateValue = document.getElementById("entryDate").value;
+  if (!dateValue) return;
+  const date = startOfDay(new Date(dateValue + "T00:00:00"));
+  const groups = plannedProtocolGroups(date);
+  const current = selectedProtocolKeys("plannedProtocolList");
+  const selected = current.length ? current.filter(key => groups.some(group => group.key === key)) : groups.map(group => group.key);
+  renderProtocolChoices("plannedProtocolList", groups, selected);
+  setSiteOptions("plannedHormoneSite", suggestedHormoneSite(load().entries, date));
+  syncSiteVisibility("plannedProtocolList", "plannedSiteWrap");
+  document.querySelectorAll("#plannedProtocolList input").forEach(input => input.addEventListener("change", () => syncSiteVisibility("plannedProtocolList", "plannedSiteWrap")));
+}
+function openProtocolModal(groups = null, selectedKeys = null) {
+  const now = new Date();
+  const data = load();
+  const allGroups = groups || plannedProtocolGroups(startOfDay(now));
+  const selected = selectedKeys || (pendingProtocolGroups(data.entries, startOfDay(now)).map(group => group.key));
+  const effectiveSelected = selected.length ? selected : allGroups.map(group => group.key);
+  renderProtocolChoices("quickProtocolList", allGroups, effectiveSelected);
+  setSiteOptions("quickHormoneSite", suggestedHormoneSite(data.entries, now));
+  document.getElementById("protocolModalDate").textContent = fmtDate(now, { day: "2-digit", month: "2-digit" }) + " " + isoTime(now);
+  syncSiteVisibility("quickProtocolList", "quickSiteWrap");
+  document.querySelectorAll("#quickProtocolList input").forEach(input => input.addEventListener("change", () => syncSiteVisibility("quickProtocolList", "quickSiteWrap")));
+  document.getElementById("protocolModal").classList.add("show");
+}
+function closeProtocolModal() {
+  document.getElementById("protocolModal").classList.remove("show");
+}
+let pendingPromptShown = false;
+function maybeShowPendingModal(pending, now) {
+  if (pendingPromptShown || !pending.length) return;
+  pendingPromptShown = true;
+  document.getElementById("pendingModalDate").textContent = fmtDate(now, { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
+  document.getElementById("pendingModalText").textContent = "Pendente: " + pending.map(group => group.name).join(" + ");
+  document.getElementById("pendingModal").classList.add("show");
+}
+function closePendingModal() {
+  document.getElementById("pendingModal").classList.remove("show");
+}
+document.querySelectorAll(".tab, [data-page-jump]").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const page = btn.dataset.page || btn.dataset.pageJump;
+    document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.dataset.page === page));
+    document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === "page-" + page));
+  });
+});
+document.getElementById("quickDone").addEventListener("click", () => {
+  const now = new Date();
+  const groups = plannedProtocolGroups(startOfDay(now));
+  if (!groups.length) return toast("Hoje nao tem dose planejada");
+  openProtocolModal(groups);
+});
+document.getElementById("cancelProtocol").addEventListener("click", closeProtocolModal);
+document.getElementById("saveProtocol").addEventListener("click", () => {
+  const now = new Date();
+  const selected = selectedProtocolKeys("quickProtocolList");
+  const hormoneSite = document.getElementById("quickHormoneSite").value;
+  addEntry(now, "registro rapido", "planned", selected, { hormoneSite });
+  closeProtocolModal();
+});
+document.getElementById("dismissPending").addEventListener("click", closePendingModal);
+document.getElementById("openPendingRegister").addEventListener("click", () => {
+  closePendingModal();
+  openProtocolModal();
+});
+document.getElementById("logForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const date = document.getElementById("entryDate").value;
+  const time = document.getElementById("entryTime").value;
+  const kind = document.getElementById("entryKind").value;
+  const note = document.getElementById("entryNote").value.trim();
+  const selected = kind === "planned" ? selectedProtocolKeys("plannedProtocolList") : null;
+  const hormoneSite = document.getElementById("plannedHormoneSite").value;
+  addEntry(new Date(date + "T" + time + ":00"), note, kind, selected, { hormoneSite });
+  e.target.reset();
+  const now = new Date();
+  document.getElementById("entryDate").value = isoDate(now);
+  document.getElementById("entryTime").value = isoTime(now);
+  document.getElementById("entryKind").value = "planned";
+  document.getElementById("plannedFields").style.display = "grid";
+  document.getElementById("customFields").style.display = "none";
+  updatePlannedProtocolFields();
+});
+document.getElementById("entryKind").addEventListener("change", (e) => {
+  const custom = e.target.value === "custom";
+  document.getElementById("customFields").style.display = custom ? "grid" : "none";
+  document.getElementById("plannedFields").style.display = custom ? "none" : "grid";
+});
+document.getElementById("entryDate").addEventListener("change", updatePlannedProtocolFields);
+document.getElementById("weightForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const value = Number(document.getElementById("weightValue").value || 0);
+  const dt = document.getElementById("weightDate").value;
+  if (!value || !dt) return toast("Informe peso e data");
+  const data = load();
+  data.weights.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), value, dt: new Date(dt).toISOString(), obs: "" });
+  save(data);
+  document.getElementById("weightValue").value = "";
+  render();
+});
+document.getElementById("waistForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const value = Number(document.getElementById("waistValue").value || 0);
+  const dt = document.getElementById("waistDate").value;
+  if (!value || !dt) return toast("Informe cintura e data");
+  const data = load();
+  data.waists.push({ id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()), value, dt: new Date(dt).toISOString(), obs: "" });
+  save(data);
+  document.getElementById("waistValue").value = "";
+  render();
+});
+document.getElementById("stockForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const product = document.getElementById("stockProduct").value;
+  const qty = Number(document.getElementById("stockQty").value || 0);
+  const note = document.getElementById("stockNote").value.trim();
+  if (!qty || qty <= 0) return toast("Informe a quantidade de estoque");
+  const data = load();
+  data.stockAdds.push({
+    id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+    product,
+    qty,
+    note,
+    timestamp: Date.now()
+  });
+  save(data);
+  e.target.reset();
+  toast("Estoque atualizado");
+  render();
+});
+document.getElementById("protocolForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const data = load();
+  const from = document.getElementById("protocolFrom").value;
+  const type = document.getElementById("protocolType").value;
+  const days = selectedProtocolDays();
+  if (!days.length) return toast("Selecione ao menos um dia");
+  const settings = normalizeSettings(data.settings);
+  if (type === "hormone") {
+    const rule = {
+      from,
+      days,
+      doses: {
+        test: Number(document.getElementById("hormoneTestMl").value || 0),
+        primo: Number(document.getElementById("hormonePrimoMl").value || 0),
+        npp: Number(document.getElementById("hormoneNppMl").value || 0)
+      }
+    };
+    settings.protocols.hormone.rules = settings.protocols.hormone.rules.filter(item => item.from !== from);
+    settings.protocols.hormone.rules.push(rule);
+    settings.protocols.hormone.userEdited = true;
+  } else {
+    const rule = { from, ghkDays: days, tbDays: days, tirzeDays: days };
+    settings.protocols.peptide.rules = settings.protocols.peptide.rules.filter(item => item.from !== from);
+    settings.protocols.peptide.rules.push(rule);
+  }
+  settings.protocols.ghk.daily = document.getElementById("ghkSchedule").value === "daily";
+  data.settings = settings;
+  save(data);
+  toast("Protocolo atualizado");
+  render();
+});
+document.getElementById("protocolType").addEventListener("change", renderProtocolDayList);
+document.getElementById("protocolFrom").addEventListener("change", renderProtocolDayList);
+document.getElementById("recoverData").addEventListener("click", () => {
+  let data = load();
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      data = mergeData(data, readStoredData(localStorage.key(i)));
+    }
+  } catch {}
+  data.entries = mergeMissingById(data.entries || [], scanLocalStorageForEntries());
+  save(normalizeData(data));
+  toast("Dados locais reprocessados");
+  render();
+});
+document.getElementById("exportData").addEventListener("click", () => {
+  const data = load();
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "proctyoapp_backup_" + isoDate(new Date()) + ".json";
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+});
+document.getElementById("fullBackupInput").addEventListener("change", async (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  try {
+    const data = mergeFullBackup(load(), JSON.parse(await file.text()));
+    save(data);
+    toast("Backup completo importado");
+    render();
+  } catch {
+    toast("Nao foi possivel importar o backup");
+  }
+});
+function updateDilutionCalc() {
+  const totalMg = Number(document.getElementById("calcTotalMg").value || 0);
+  const waterMl = Number(document.getElementById("calcWaterMl").value || 0);
+  const doseMg = Number(document.getElementById("calcDoseMg").value || 0);
+  const result = document.getElementById("calcResult");
+  const detail = document.getElementById("calcDetail");
+  if (!totalMg || !waterMl || !doseMg) {
+    result.value = "--";
+    detail.textContent = "Preencha produto, diluente e dose desejada.";
+    return;
+  }
+  const concentration = totalMg / waterMl;
+  const ui = (doseMg / concentration) * 100;
+  result.value = ui.toFixed(ui < 10 ? 1 : 0).replace(".", ",") + " UI";
+  detail.textContent = `${totalMg.toString().replace(".", ",")} mg em ${waterMl.toString().replace(".", ",")} ml = ${concentration.toFixed(2).replace(".", ",")} mg/ml. Para ${doseMg.toString().replace(".", ",")} mg, aspirar ${result.value}.`;
+}
+function importGhkBackup(json) {
+  const doses = Array.isArray(json.doses) ? json.doses : [];
+  const users = Number(json.compostos?.find(c => c.id === "ghkcu")?.usuarios || 2);
+  const imported = doses.filter(d => d.compId === "ghkcu" && Number(d.mg) > 0).map(d => ({
+    id: "backup-ghk-" + d.id,
+    timestamp: new Date(d.dt).getTime(),
+    note: [d.local, d.obs, "backup GHK-CU"].filter(Boolean).join(" · "),
+    source: "backup-ghk",
+    doses: [{ product: "ghk", qty: Number(d.mg) * users, displayQty: Number(d.mg), route: "SC", label: Number(d.mg).toString().replace(".", ",") + " mg" }]
+  })).filter(e => Number.isFinite(e.timestamp));
+  const data = load();
+  const ids = new Set(data.entries.map(e => e.id));
+  const fresh = imported.filter(e => !ids.has(e.id));
+  data.entries.push(...fresh);
+  save(data);
+  document.getElementById("backupStatus").textContent = `Importadas ${fresh.length} aplicacoes GHK-CU. Itens duplicados foram ignorados.`;
+  toast("Backup importado");
+  render();
+}
+document.querySelectorAll("#calcTotalMg, #calcWaterMl, #calcDoseMg").forEach(el => el.addEventListener("input", updateDilutionCalc));
+const backupInput = document.getElementById("backupInput");
+if (backupInput) {
+  backupInput.addEventListener("change", async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try { importGhkBackup(JSON.parse(await file.text())); }
+    catch { document.getElementById("backupStatus").textContent = "Nao foi possivel ler este JSON."; }
+  });
+}
+const now = new Date();
+save(load());
+document.getElementById("entryDate").value = isoDate(now);
+document.getElementById("entryTime").value = isoTime(now);
+document.getElementById("weightDate").value = localDateTime(now);
+document.getElementById("waistDate").value = localDateTime(now);
+updateDilutionCalc();
+render();
+if ("serviceWorker" in navigator && location.protocol !== "file:") {
+  navigator.serviceWorker.register("service-worker.js").catch(() => {});
+}
+</script>
+</body>
+</html>

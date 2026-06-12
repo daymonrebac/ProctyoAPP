@@ -1,0 +1,10 @@
+{
+  "name": "ProctyoAPP",
+  "short_name": "Proctyo",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0b1110",
+  "theme_color": "#0b1110",
+  "orientation": "portrait",
+  "lang": "pt-BR"
+}
